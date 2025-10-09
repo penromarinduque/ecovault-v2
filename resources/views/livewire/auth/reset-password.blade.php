@@ -68,7 +68,114 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
+<div class="container mt-5" style="max-width: 500px;">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h3 class="font-weight-bold">{{ __('Reset Password') }}</h3>
+        <p class="text-muted mb-0">{{ __('Please enter your new password below') }}</p>
+    </div>
+
+    <!-- Session Status -->
+    @if (session('status'))
+        <div class="alert alert-success text-center">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    <!-- Reset Password Form -->
+    <form method="POST" wire:submit.prevent="resetPassword">
+        @csrf
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email">{{ __('Email') }}</label>
+            <input
+                id="email"
+                type="email"
+                class="form-control @error('email') is-invalid @enderror"
+                wire:model="email"
+                required
+                autocomplete="email"
+                placeholder="{{ __('Enter your email') }}"
+            >
+            @error('email')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <!-- New Password -->
+        <div class="form-group">
+            <label for="password">{{ __('Password') }}</label>
+            <div class="input-group">
+                <input
+                    id="password"
+                    type="password"
+                    class="form-control @error('password') is-invalid @enderror"
+                    wire:model="password"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Password') }}"
+                >
+                <div class="input-group-append">
+                    <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        onclick="togglePasswordVisibility('password', event)"
+                    >
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+                @error('password')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+            <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+            <div class="input-group">
+                <input
+                    id="password_confirmation"
+                    type="password"
+                    class="form-control @error('password_confirmation') is-invalid @enderror"
+                    wire:model="password_confirmation"
+                    required
+                    autocomplete="new-password"
+                    placeholder="{{ __('Confirm password') }}"
+                >
+                <div class="input-group-append">
+                    <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        onclick="togglePasswordVisibility('password_confirmation', event)"
+                    >
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+                @error('password_confirmation')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-group">
+            <button
+                type="submit"
+                class="btn btn-primary btn-block"
+                data-test="reset-password-button"
+            >
+                {{ __('Reset Password') }}
+            </button>
+        </div>
+    </form>
+</div>
+
+
+
+
+{{-- <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Reset password')" :description="__('Please enter your new password below')" />
 
     <!-- Session Status -->
@@ -112,4 +219,4 @@ new #[Layout('components.layouts.auth')] class extends Component {
             </flux:button>
         </div>
     </form>
-</div>
+</div> --}}

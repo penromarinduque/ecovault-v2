@@ -100,7 +100,87 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
+<div class="d-flex flex-column">
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <h4 class="mb-1">{{ __('Log in to your account') }}</h4>
+    <p class="text-muted mb-0">{{ __('Enter your email and password below to log in') }}</p>
+  </div>
+
+  <!-- Session Status -->
+  @if (session('status'))
+      <div class="alert alert-success text-center" role="alert">
+          {{ session('status') }}
+      </div>
+  @endif
+
+  <form method="POST" wire:submit="login">
+      @csrf
+
+      <!-- Email Address -->
+      <div class="form-group">
+          <label for="email">{{ __('Email address') }}</label>
+          <input wire:model="email"
+                 type="email"
+                 id="email"
+                 name="email"
+                 class="form-control @error('email') is-invalid @enderror"
+                 placeholder="email@example.com"
+                 required
+                 autofocus
+                 autocomplete="email">
+          @error('email')
+              <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+      </div>
+
+      <!-- Password -->
+      <div class="form-group position-relative">
+          <label for="password">{{ __('Password') }}</label>
+          <input wire:model="password"
+                 type="password"
+                 id="password"
+                 name="password"
+                 class="form-control @error('password') is-invalid @enderror"
+                 placeholder="{{ __('Password') }}"
+                 required
+                 autocomplete="current-password">
+          @error('password')
+              <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+
+          @if (Route::has('password.request'))
+              <a href="{{ route('password.request') }}"
+                 wire:navigate
+                 class="small position-absolute"
+                 style="top: 0; right: 0;">
+                 {{ __('Forgot your password?') }}
+              </a>
+          @endif
+      </div>
+
+      <!-- Remember Me -->
+      <div class="form-group form-check">
+          <input wire:model="remember" type="checkbox" class="form-check-input" id="remember">
+          <label class="form-check-label" for="remember">{{ __('Remember me') }}</label>
+      </div>
+
+      <div class="text-right">
+          <button type="submit" class="btn btn-primary btn-block" data-test="login-button">
+              {{ __('Log in') }}
+          </button>
+      </div>
+  </form>
+
+  @if (Route::has('register'))
+      <div class="text-center mt-3">
+          <span class="text-muted small">{{ __('Don\'t have an account?') }}</span>
+          <a href="{{ route('register') }}" wire:navigate>{{ __('Sign up') }}</a>
+      </div>
+  @endif
+</div>
+
+{{-- <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
     <!-- Session Status -->
@@ -153,4 +233,4 @@ new #[Layout('components.layouts.auth')] class extends Component {
             <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
         </div>
     @endif
-</div>
+</div> --}}

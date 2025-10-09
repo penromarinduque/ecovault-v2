@@ -37,7 +37,70 @@ new class extends Component {
     }
 }; ?>
 
-<section class="w-full">
+<div class="container-fluid">
+    <section class="w-100">
+        @include('partials.settings-heading')
+        <br>
+        <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
+            <form method="POST" wire:submit="updatePassword" class="mt-4">
+                @csrf
+
+                <!-- Current Password -->
+                <div class="form-group">
+                    <label for="current_password">{{ __('Current Password') }}</label>
+                    <input type="password"
+                            wire:model="current_password"
+                            id="current_password"
+                            class="form-control @error('current_password') is-invalid @enderror"
+                            autocomplete="current-password"
+                            required>
+                    @error('current_password')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                <!-- New Password -->
+                <div class="form-group">
+                    <label for="password">{{ __('New Password') }}</label>
+                    <input type="password"
+                            wire:model="password"
+                            id="password"
+                            class="form-control @error('password') is-invalid @enderror"
+                            autocomplete="new-password"
+                            required>
+                    @error('password')
+                        <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-group">
+                    <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+                    <input type="password"
+                            wire:model="password_confirmation"
+                            id="password_confirmation"
+                            class="form-control"
+                            autocomplete="new-password"
+                            required>
+                </div>
+
+                <div class="d-flex align-items-center mt-4">
+                    <button type="submit"
+                            class="btn btn-primary mr-3"
+                            data-test="update-password-button">
+                        {{ __('Save') }}
+                    </button>
+
+                    <x-action-message on="password-updated">
+                        <span class="text-success font-weight-bold">{{ __('Saved.') }}</span>
+                    </x-action-message>
+                </div>
+            </form>
+        </x-settings.layout>
+    </section>
+</div>
+
+{{-- <section class="w-full">
     @include('partials.settings-heading')
 
     <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
@@ -77,4 +140,4 @@ new class extends Component {
             </div>
         </form>
     </x-settings.layout>
-</section>
+</section> --}}

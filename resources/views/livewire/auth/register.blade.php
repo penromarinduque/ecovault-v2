@@ -38,7 +38,100 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
+<div class="d-flex flex-column">
+  <!-- Header -->
+  <div class="text-center mb-4">
+      <h4 class="mb-1">{{ __('Create an account') }}</h4>
+      <p class="text-muted mb-0">{{ __('Enter your details below to create your account') }}</p>
+  </div>
+
+  <!-- Session Status -->
+  @if (session('status'))
+      <div class="alert alert-success text-center" role="alert">
+          {{ session('status') }}
+      </div>
+  @endif
+
+  <form method="POST" wire:submit="register">
+      @csrf
+
+      <!-- Name -->
+      <div class="form-group">
+          <label for="name">{{ __('Name') }}</label>
+          <input wire:model="name"
+                 type="text"
+                 id="name"
+                 name="name"
+                 class="form-control @error('name') is-invalid @enderror"
+                 placeholder="{{ __('Full name') }}"
+                 required
+                 autofocus
+                 autocomplete="name">
+          @error('name')
+              <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group">
+          <label for="email">{{ __('Email address') }}</label>
+          <input wire:model="email"
+                 type="email"
+                 id="email"
+                 name="email"
+                 class="form-control @error('email') is-invalid @enderror"
+                 placeholder="email@example.com"
+                 required
+                 autocomplete="email">
+          @error('email')
+              <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+          <label for="password">{{ __('Password') }}</label>
+          <input wire:model="password"
+                 type="password"
+                 id="password"
+                 name="password"
+                 class="form-control @error('password') is-invalid @enderror"
+                 placeholder="{{ __('Password') }}"
+                 required
+                 autocomplete="new-password">
+          @error('password')
+              <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+          <label for="password_confirmation">{{ __('Confirm password') }}</label>
+          <input wire:model="password_confirmation"
+                 type="password"
+                 id="password_confirmation"
+                 name="password_confirmation"
+                 class="form-control"
+                 placeholder="{{ __('Confirm password') }}"
+                 required
+                 autocomplete="new-password">
+      </div>
+
+      <button type="submit"
+              class="btn btn-primary btn-block"
+              data-test="register-user-button">
+          {{ __('Create account') }}
+      </button>
+  </form>
+
+  <div class="text-center mt-3 small text-muted">
+      <span>{{ __('Already have an account?') }}</span>
+      <a href="{{ route('login') }}" wire:navigate>{{ __('Log in') }}</a>
+  </div>
+</div>
+
+
+{{-- <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
     <!-- Session Status -->
@@ -99,4 +192,4 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <span>{{ __('Already have an account?') }}</span>
         <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
     </div>
-</div>
+</div> --}}

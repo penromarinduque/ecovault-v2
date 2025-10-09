@@ -10,5 +10,14 @@
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-@vite(['resources/css/app.css', 'resources/js/app.js'])
-{{-- @fluxAppearance --}}
+{{-- Niceadmin Assets --}}
+<!-- Custom CSS -->
+<link href="{{ asset('assets/libs/chartist/dist/chartist.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/extra-libs/c3/c3.min.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css') }}" rel="stylesheet" />
+<!-- Custom CSS -->
+<link href="{{ asset('dist/css/style.min.css') }}" rel="stylesheet">
+
+
+{{-- @vite(['resources/css/app.css', 'resources/js/app.js']) 
+@fluxAppearance --}}
