@@ -60,7 +60,7 @@
                 <!-- ============================================================== -->
                 <!-- Search -->
                 <!-- ============================================================== -->
-                <li class="nav-item search-box">
+                {{-- <li class="nav-item search-box">
                     <a class="nav-link waves-effect waves-dark" href="javascript:void(0)">
                         <div class="d-flex align-items-center">
                             <i class="mdi mdi-magnify font-20 mr-1"></i>
@@ -75,7 +75,7 @@
                             <i class="ti-close"></i>
                         </a>
                     </form>
-                </li>
+                </li> --}}
             </ul>
             <!-- ============================================================== -->
             <!-- Right side toggle and nav items -->
@@ -292,10 +292,6 @@
                             
                             <div class="dropdown-divider"></div>
                         </div>
-                        <div class="p-l-30 p-10">
-                            <a href="javascript:void(0)" class="btn btn-sm btn-success btn-rounded">View
-                                Profile</a>
-                        </div>
                     </div>
                 </li>
                 <!-- ============================================================== -->
@@ -304,4 +300,4 @@
             </ul>
         </div>
     </nav>
-    </header>
+</header>

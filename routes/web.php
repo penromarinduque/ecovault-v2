@@ -13,6 +13,10 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+    Route::view('test', 'test.test')
+        ->middleware(['auth', 'verified'])
+        ->name('test');
+
 Route::group(["prefix" => "admin", "as" => "admin."], function () {
     Route::group(["prefix" => "users", "as" => "users."], function () {
         Route::get('/', UserIndex::class)->middleware(['auth', 'verified'])->name('index');

@@ -18,6 +18,6 @@
 <!-- Custom CSS -->
 <link href="{{ asset('dist/css/style.min.css') }}" rel="stylesheet">
 
-
-{{-- @vite(['resources/css/app.css', 'resources/js/app.js']) 
-@fluxAppearance --}}
+@vite(['resources/js/app.js']) 
+{{-- @fluxAppearance --}}
+@livewireStyles

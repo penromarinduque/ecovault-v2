@@ -60,6 +60,11 @@ class User extends Authenticatable
             ->implode('');
     }
 
+    public function roles()
+    {
+        return $this->hasMany(Role::class);
+    }
+
     public function isAdmin(): bool
     {
         $roles = $this->roles;
