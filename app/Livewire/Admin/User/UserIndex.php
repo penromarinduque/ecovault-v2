@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Admin\User;
 
+use App\Models\EncoderDesignation;
+use App\Models\MainFolder;
 use App\Models\Role;
 use App\Models\RoleType;
 use App\Models\User;
@@ -22,6 +24,7 @@ class UserIndex extends Component
     public $search = '';
     public User $selectedUser;
     public $roleTypes;
+    public $mainFolders;
     public $editRoleModalVisibility = true;
 
     public function editRole(User $user)
@@ -84,7 +87,8 @@ class UserIndex extends Component
         $this->selectedUser = User::with('roles', 'roles.roleType')->find($this->selectedUser->id);
     }
 
-     public function deleteUser(User $user){
+    public function deleteUser(User $user)
+    {
         // 
         Role::where('user_id', $user->id)->delete();
         $user->delete();
@@ -102,7 +106,22 @@ class UserIndex extends Component
         return view('livewire.admin.user.user-index', compact('users'));
     }
 
+    public function toggleEncoderDesignation($user_id, $main_folder_id) {
+        $designation = EncoderDesignation::where('user_id', $user_id)->where('main_folder_id', $main_folder_id)->first();
+        if($designation) {
+            $designation->delete();
+            notyf()->position('y', 'top')->success('Designation removed successfully!');
+            return;
+        }
+        EncoderDesignation::create([
+            'user_id' => $user_id,
+            'main_folder_id' => $main_folder_id,
+        ]);
+        notyf()->position('y', 'top')->success('Designation added successfully!');
+    }
+
     public function mount(){
         $this->roleTypes = RoleType::all();
+        $this->mainFolders = MainFolder::all();
     }
 }

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleTypeSeeder::class,
+            MainFolderSeeder::class
         ]);
     }
 }

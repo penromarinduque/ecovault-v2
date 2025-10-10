@@ -55,37 +55,55 @@
                 <div class="modal-body">
                     <span class="font-weight-bold">User :</span> <u class="underline">{{ $selectedUser->name ?? 'N/A' }}</u><br>
                     <div class="table-responsive">
-                        <div class="d-flex justify-content-end mb-2">
-                            <button class="btn btn-primary">Add Role</button>
-                        </div>
                         <h6 class="font-weight-bold">Roles : </h6>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th width="30px"></th>
                                     <th>Role</th>
-                                    <th>Assigned</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($roleTypes as $roleType)
                                     <tr>
                                         <td>
-                                            <input type="checkbox" 
-                                                wire:change="toggleRole('{{ $roleType->id }}')" @if($selectedUser && $selectedUser->roles->contains('role_type_id', $roleType->id)) checked @endif>
+                                            <input type="checkbox" wire:change="toggleRole('{{ $roleType->id }}')" @if($selectedUser && $selectedUser->roles->contains('role_type_id', $roleType->id)) checked @endif>
                                         </td>
                                         <td>{{ $roleType->name }}</td>
-                                        <td>
-                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center">No roles found for this user.</td>
+                                        <td colspan="2" class="text-center">No roles found for this user.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    @if ($selectedUser && $selectedUser->roles->contains('role_type_id', 2))
+                    <div class="table-responsive">
+                        <h6 class="font-weight-bold">Encoder Assignments : </h6>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th width="30px"></th>
+                                    <th>Assignment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($mainFolders as $mainFolder)
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" wire:change="toggleEncoderDesignation('{{ $selectedUser->id }}','{{ $mainFolder->id }}')">
+                                    </td>
+                                    <td>
+                                        {{ $mainFolder->name }}
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
