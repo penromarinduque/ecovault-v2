@@ -45,6 +45,7 @@
             icon.classList.add('fa-eye');
         }
     }
+
 </script>
 @yield('scripts')
 @livewireScripts

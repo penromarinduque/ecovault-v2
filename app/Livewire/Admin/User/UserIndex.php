@@ -15,6 +15,9 @@ class UserIndex extends Component
     use WithPagination, WithoutUrlPagination;
 
     protected $paginationTheme = 'bootstrap';
+    protected $listeners = [
+        'user-created'
+    ];
 
     public $search = '';
     public User $selectedUser;
@@ -81,12 +84,12 @@ class UserIndex extends Component
         $this->selectedUser = User::with('roles', 'roles.roleType')->find($this->selectedUser->id);
     }
 
-    public function deleteUser(User $user){
+     public function deleteUser(User $user){
         // 
         Role::where('user_id', $user->id)->delete();
         $user->delete();
         notyf()->position('y', 'top')->success('User deleted successfully!');
-    }
+    }   
 
     public function render()
     {
@@ -94,7 +97,7 @@ class UserIndex extends Component
         ->with('roles', 'roles.roleType')
             ->where('name', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%')
-            ->paginate(5);
+            ->paginate(10);
 
         return view('livewire.admin.user.user-index', compact('users'));
     }

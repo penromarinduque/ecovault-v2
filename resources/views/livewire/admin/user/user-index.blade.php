@@ -1,9 +1,11 @@
 <div>
     <x-page-header title="Users" />
+    <div class="d-flex justify-content-end mb-2">
+        @livewire('admin.user.user-create')
+    </div>
     <div class="card">
         <div class="card-body">
             <input wire:model.live.debounce.300ms="search" type="text" class="form-control mb-3" placeholder="Search users...">
-
             <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead class="">
@@ -16,7 +18,7 @@
                     <tbody>
                         @forelse ($users as $user)
                             <tr>    
-                                <td>{{ $user->name }}</td>
+                                <td> <img src="https://api.dicebear.com/9.x/identicon/svg?seed={{ $user->name }}" class="rounded-circle mr-2" width="25px" alt="" >{{ $user->name }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     <!-- Example actions -->
