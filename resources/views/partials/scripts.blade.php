@@ -46,5 +46,7 @@
         }
     }
 </script>
+@yield('scripts')
 @livewireScripts
+
 
