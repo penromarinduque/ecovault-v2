@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\User\UserIndex;
+use App\Livewire\Main\ViewFolder;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
@@ -20,6 +21,12 @@ Route::view('dashboard', 'dashboard')
 Route::group(["prefix" => "admin", "as" => "admin."], function () {
     Route::group(["prefix" => "users", "as" => "users."], function () {
         Route::get('/', UserIndex::class)->middleware(['auth', 'verified'])->name('index');
+    });
+});
+
+Route::group(["prefix" => "main", "as" => "main."], function () {
+    Route::group(["prefix" => "folders", "as" => "folders."], function () {
+        Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
     });
 });
 

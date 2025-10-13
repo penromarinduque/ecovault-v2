@@ -7,15 +7,15 @@
         <!-- Sidebar navigation-->
         <nav class="sidebar-nav">
             <ul id="sidebarnav">
-                <li class="nav-small-cap">
-                    <i class="mdi mdi-dots-horizontal"></i>
-                    <span class="hide-menu">Admin</span>
-                </li>
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link ">
                         <i class="mdi mdi-view-dashboard"></i>
                         <span class="hide-menu"> Dashboard </span>
                     </a>
+                </li>
+                <li class="nav-small-cap">
+                    <i class="mdi mdi-dots-horizontal"></i>
+                    <span class="hide-menu">Admin</span>
                 </li>
                 <li class="sidebar-item">
                     <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
@@ -23,7 +23,7 @@
                         <span class="hide-menu"> Users </span>
                     </a>
                 </li>
-                <li class="sidebar-item">
+                {{-- <li class="sidebar-item">
                     <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
                         aria-expanded="false">
                         <i class="fas fa-users"></i>
@@ -50,7 +50,8 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
+                @livewire('components.main-folder-nav')
             </ul>
         </nav>
         <!-- End Sidebar navigation -->
