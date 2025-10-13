@@ -16,7 +16,7 @@
                     </div>
                     <div class="mb-2" style="max-width: 50px">
                         <label for="color" class="form-label">Color</label>
-                        <input type="color" class="" id="name" wire:model.lazy="color">
+                        <input type="color" class="" id="name" wire:model.lazy="color" value="#abcbff">
                         @error('color') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                 </div>

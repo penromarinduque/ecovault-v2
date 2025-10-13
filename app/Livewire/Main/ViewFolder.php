@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class ViewFolder extends Component
 {
-    // use Withou
+    // use Without
     protected $listeners = ['refresh-folders'];
 
     public $main_folder_id;
@@ -29,6 +29,10 @@ class ViewFolder extends Component
     public function addFolder($main_folder_id, ) 
     {
         $this->dispatch('addFolder', main_folder_id: $main_folder_id, parent_folder_id: $this->folder_id);
+    }
+
+    public function deleteFolder($folder_id) {
+        
     }
 
     public function mount($main_folder_id)

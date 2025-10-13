@@ -27,6 +27,7 @@ class FolderCreate extends Component
         $this->main_folder_id = $main_folder_id;
         $this->parent_folder_id = $parent_folder_id;
         $this->reset(['name', 'color']);
+        $this->color = '#ababab';
         $this->resetErrorBag();
         $this->dispatch('show-create-folder-modal');
     }
