@@ -2,15 +2,20 @@
 
 namespace App\Livewire\Main;
 
+use App\Models\File;
 use App\Models\Folder;
 use App\Models\MainFolder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithoutUrlPagination;
+use Livewire\WithPagination;
 
 class ViewFolder extends Component
 {
-    // use Without
+    use WithoutUrlPagination, WithPagination;
+    protected $paginationTheme = 'bootstrap';
     protected $listeners = ['refresh-folders'];
 
     public $main_folder_id;
@@ -19,12 +24,44 @@ class ViewFolder extends Component
     #[Url]
     public $folder_id = '';
     public $folder;
+    public $search = '';
 
     public function navigateTo($folder_id) {
         $this->folder_id = $folder_id;
         $this->folder = Folder::where('id', $folder_id)->with('parentFolder')->first();
         Log::info($this->folder);
     }
+
+    public function downloadFile($file_id) {
+        $file = File::find($file_id);
+        return Storage::download('/uploads/'.$file->file_name, $file->name);
+    }
+
+    public function deleteFile($file_id) {
+        $file = File::find($file_id);
+        Storage::delete('/uploads/'.$file->file_name);
+        $file->delete();
+    }
+
+    public function previewFile($file_id)
+{
+    $file = File::findOrFail($file_id);
+    $path = 'uploads/' . $file->file_name;
+
+    if (!Storage::exists($path)) {
+        abort(404, 'File not found.');
+    }
+
+    $mimeType = Storage::mimeType($path);
+
+    return response()->file(
+        Storage::path($path),
+        [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $file->name . '"',
+        ]
+    );
+}
 
     public function addFolder($main_folder_id, ) 
     {
@@ -33,6 +70,16 @@ class ViewFolder extends Component
 
     public function deleteFolder($folder_id) {
         
+    }
+
+    public function uploadFile($folder_id)
+    {
+        $this->dispatch('uploadFile', folder_id: $folder_id);
+    }
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
     }
 
     public function mount($main_folder_id)
@@ -48,6 +95,7 @@ class ViewFolder extends Component
     {
         // add gate here
         $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->get();
-        return view('livewire.main.view-folder', compact('folders'));
+        $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->paginate(10) : [];
+        return view('livewire.main.view-folder', compact('folders', 'files'));
     }
 }

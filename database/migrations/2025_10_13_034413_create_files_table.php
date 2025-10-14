@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->string('name', 5000);
+            $table->string('file_name');
             $table->foreignId('folder_id');
             $table->string('doc_control_no', 100);
-            $table->string('file_type', 100);
+            $table->string('office_source', 1000);
+            $table->string('file_type', 100)->nullable();
             $table->foreignId('doc_classification_id');
             $table->datetime('date_released');
             $table->softDeletes();
