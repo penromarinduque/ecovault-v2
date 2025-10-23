@@ -20,6 +20,11 @@ class File extends Model
         'date_released' => 'date'
     ];
 
+    public function folder() 
+    {
+        return $this->belongsTo(Folder::class);
+    }
+
     public function getIconAttribute()
     {
         if($this->file_type == "pdf"){

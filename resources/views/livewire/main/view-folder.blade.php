@@ -5,6 +5,7 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
     </style>
+    @livewire('main.move-file')
     @livewire('main.upload-file')
     @livewire('main.edit-file')
     @livewire('main.folder-create')
@@ -77,13 +78,13 @@
         </div>
         @endforelse
     </div>
-    <div class="card">
+    <div class="card" >
         <div class="card-body">
             <input type="text" class="form-control mb-3" placeholder="Search files..." wire:model.live.debounce.300ms="search">
             @if ($folder_id)
-                <div class="table-responsive">
+                <div class="table-responsive" style="min-height: 800px !important;">
                     <h6 class="font-weight-bold">Files </h6>
-                    <table class="table table-hover">
+                    <table class="table table-hover" >
                         <thead>
                             <tr>
                                 <th width="30px"></th>
@@ -101,13 +102,14 @@
                                     <td>{{ $file->name }}</td>
                                     <td>{{ $file->date_released->format('M d, Y') }}</td>
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="btn-group" wire:ignore.self>
                                             <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
                                                 Options
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
                                                 <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
                                                 <button class="dropdown-item" type="button" wire:click="previewFile({{ $file->id }})">Preview</button>
+                                                <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
                                                 <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
                                                 <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                             </div>
@@ -116,7 +118,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">No files found for this folder.</td>
+                                    <td colspan="4" class="text-center">No files found for this folder.</td>
                                 </tr>
                             @endforelse
                         </tbody>

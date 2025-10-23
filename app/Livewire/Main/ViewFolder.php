@@ -108,6 +108,10 @@ class ViewFolder extends Component
         $this->dispatch('moveFolder', folder_id: $folder_id, main_folder_id: $main_folder_id);
     }
 
+    public function moveFile($file_id) {
+        $this->dispatch('moveFile', file_id: $file_id);
+    }
+
     public function mount($main_folder_id)
     {
         $this->main_folder_id = $main_folder_id;
