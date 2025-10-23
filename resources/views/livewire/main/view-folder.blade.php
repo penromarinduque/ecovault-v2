@@ -9,6 +9,7 @@
     @livewire('main.edit-file')
     @livewire('main.folder-create')
     @livewire('main.folder-rename')
+    @livewire('main.folder-move')
     <h3>{{ $main_folder->name }}</h3>
     <div class="row mb-3 justify-content-end ">
         @if (auth()->user()->isAdmin())
@@ -58,6 +59,7 @@
                         </button>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#" wire:click="renameFolder({{ $folder->id }})" ><i class="fa fa-i-cursor mr-2" aria-hidden="true"></i>Rename</a>
+                            <a class="dropdown-item" href="#" wire:click="moveFolder({{ $folder->id }}, {{ $main_folder_id }})" ><i class="fas fa-expand-arrows-alt mr-2" aria-hidden="true"></i>Move</a>
                             <a class="dropdown-item text-danger" href="#" wire:confirm="Are you sure you want to delete this folder? All of the files and subfolders will be deleted." wire:loading.attr="disabled" wire:click="deleteFolder({{ $folder->id }})"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
                         </div>
                     </div>
