@@ -4,6 +4,7 @@ namespace App\Livewire\Main;
 
 use App\Models\DocClassification;
 use App\Models\File;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Illuminate\Support\Str;
@@ -32,7 +33,7 @@ class UploadFile extends Component
 
     public function uploadFile($folder_id)
     {
-        $this->reset(['name', 'control_no', 'classification', 'date_released']);
+        $this->reset(['name', 'control_no', 'classification', 'date_released', 'document', 'office_source']);
         $this->resetErrorBag();
         $this->folder_id = $folder_id;
         $this->dispatch('show-upload-file-modal');
@@ -40,12 +41,18 @@ class UploadFile extends Component
 
     public function mount() {
         $this->classifications = DocClassification::all();
+        Log::info($this->classifications);
     }
 
     public function saveFile() {
         $this->validate();
+        if(File::where(['name' => $this->name, 'folder_id' => $this->folder_id])->exists())
+        {
+            notyf()->position('y', 'top')->error('File already exists!');
+            return;
+        }
         $file_name = Str::random(10).uniqid().".".$this->document->getClientOriginalExtension();
-        File::create([
+        $file = File::create([
             'name' => $this->name,
             'folder_id' => $this->folder_id,
             'doc_control_no' => $this->control_no,
@@ -55,7 +62,7 @@ class UploadFile extends Component
             'file_type' => $this->document->getClientOriginalExtension(),
             'file_name' => $file_name
         ]);
-        $this->document->storeAs('/uploads/', $file_name);
+        $file->storeAndEmbedQr($this->document);
         notyf()->position('y', 'top')->success('File uploaded successfully!');
         $this->dispatch('hide-upload-file-modal');
         $this->dispatch('refresh-folders');

@@ -5,6 +5,7 @@ namespace App\Livewire\Main;
 use App\Models\File;
 use App\Models\Folder;
 use App\Models\MainFolder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Url;
@@ -44,24 +45,24 @@ class ViewFolder extends Component
     }
 
     public function previewFile($file_id)
-{
-    $file = File::findOrFail($file_id);
-    $path = 'uploads/' . $file->file_name;
+    {
+        $file = File::findOrFail($file_id);
+        $path = 'uploads/' . $file->file_name;
 
-    if (!Storage::exists($path)) {
-        abort(404, 'File not found.');
+        if (!Storage::exists($path)) {
+            abort(404, 'File not found.');
+        }
+
+        $mimeType = Storage::mimeType($path);
+
+        return response()->file(
+            Storage::path($path),
+            [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $file->name . '"',
+            ]
+        );
     }
-
-    $mimeType = Storage::mimeType($path);
-
-    return response()->file(
-        Storage::path($path),
-        [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . $file->name . '"',
-        ]
-    );
-}
 
     public function addFolder($main_folder_id, ) 
     {
@@ -69,7 +70,17 @@ class ViewFolder extends Component
     }
 
     public function deleteFolder($folder_id) {
-        
+        try {
+            DB::transaction(function () use ($folder_id) {
+                $folder = Folder::find($folder_id);
+                $folder->deleteWithChildren();
+                notyf()->position('y', 'top')->success('Folder deleted successfully!');
+            });
+        } catch (\Throwable $th) {
+            notyf()->position('y', 'top')->error('An unexpected error occured while deleting the folder. Please try again.');
+            Log::error($th);
+            return;
+        }
     }
 
     public function uploadFile($folder_id)
@@ -82,13 +93,22 @@ class ViewFolder extends Component
         $this->resetPage();
     }
 
+    public function renameFolder($folder_id)
+    {
+        $this->dispatch('renameFolder', folder_id: $folder_id);
+    }
+
+    public function editFile($file_id)
+    {
+        $this->dispatch('editFile', file_id: $file_id);
+    }
+
     public function mount($main_folder_id)
     {
         $this->main_folder_id = $main_folder_id;
         $this->main_folder = MainFolder::find($main_folder_id);
         $this->folder = $this->folder_id ? Folder::where('id', $this->folder_id)->with('parentFolder')->first() : null;
         Log::info($this->folder);
-
     }
     
     public function render()

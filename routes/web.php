@@ -30,6 +30,10 @@ Route::group(["prefix" => "main", "as" => "main."], function () {
     });
 });
 
+Route::get('validate-qr/{id}', function () {
+    return "QR validations goes here";
+})->name('validate-qr');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 

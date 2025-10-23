@@ -6,7 +6,9 @@
         }
     </style>
     @livewire('main.upload-file')
+    @livewire('main.edit-file')
     @livewire('main.folder-create')
+    @livewire('main.folder-rename')
     <h3>{{ $main_folder->name }}</h3>
     <div class="row mb-3 justify-content-end ">
         @if (auth()->user()->isAdmin())
@@ -55,8 +57,8 @@
                             {{-- <i class="fas fa-ellipsis-h"></i> --}}
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#"><i class="fas fa-pen mr-2"></i>Rename</a>
-                            <a class="dropdown-item text-danger" href="#" wire:confirm="Are you sure you want to delete this folder? All of the contents will be deleted." wire:loading.attr="disabled" wire:click="deleteFolder({{ $folder->id }})"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
+                            <a class="dropdown-item" href="#" wire:click="renameFolder({{ $folder->id }})" ><i class="fa fa-i-cursor mr-2" aria-hidden="true"></i>Rename</a>
+                            <a class="dropdown-item text-danger" href="#" wire:confirm="Are you sure you want to delete this folder? All of the files and subfolders will be deleted." wire:loading.attr="disabled" wire:click="deleteFolder({{ $folder->id }})"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
                         </div>
                     </div>
                     @endif
@@ -104,7 +106,7 @@
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
                                                 <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
                                                 <button class="dropdown-item" type="button" wire:click="previewFile({{ $file->id }})">Preview</button>
-                                                <button class="dropdown-item" type="button">Edit</button>
+                                                <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
                                                 <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                             </div>
                                         </div>

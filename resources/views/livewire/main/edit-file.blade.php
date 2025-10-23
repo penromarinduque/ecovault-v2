@@ -1,9 +1,9 @@
 <div class="" >
-    <div class="modal fade " id="uploadFileModal" wire:ignore.self>
+    <div class="modal fade" id="editFileModal" wire:ignore.self>
         <div class="modal-dialog modal-lg">
             <form class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="uploadFileModalLabel">Upload File</h5>
+                    <h5 class="modal-title" id="editFileModalLabel">Edit File</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -36,17 +36,17 @@
                     </div>
                     <div class="mb-2">
                         <label for="date_released" class="form-label">Date Released</label>
-                        <input type="date" class="form-control" id="date_released" wire:model.lazy="date_released">
+                        <input type="date" class="form-control" id="date_released" wire:model.live.debounce.300ms="date_released">
                         @error('date_released') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                     <div class="mb-2">
-                        <label for="document" class="form-label">Select File</label>
-                        <input type="file" accept="application/pdf,image/jpg,image/jpeg,image/png" class="form-control" id="document" wire:model.lazy="document">
+                        <label for="document" class="form-label">Replace Attachment</label>
+                        <input type="file" accept="application/pdf,image/jpg,image/jpeg,image/png" class="form-control" id="document" wire:model="document">
                         @error('document') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" type="button" wire:loading.attr="disabled" wire:click="saveFile">Save</button>
+                    <button class="btn btn-primary" type="button" wire:loading.attr="disabled" wire:click="saveFile" wire:target="office_source,control_no,classification,date_released,document">Save</button>
                 </div>
             </form>
         </div>
@@ -54,11 +54,11 @@
 </div>
 @script
 <script>
-    $wire.on('show-upload-file-modal', () => {
-        $('#uploadFileModal').modal('show');
+    $wire.on('show-edit-file-modal', () => {
+        $('#editFileModal').modal('show');
     });
-    $wire.on('hide-upload-file-modal', () => {
-        $('#uploadFileModal').modal('hide');
+    $wire.on('hide-edit-file-modal', () => {
+        $('#editFileModal').modal('hide');
     });
 </script>
 @endscript
