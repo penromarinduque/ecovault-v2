@@ -4,6 +4,7 @@ namespace App\Livewire\Main;
 
 use App\Models\DocClassification;
 use App\Models\File;
+use App\Models\Folder;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -17,6 +18,7 @@ class UploadFile extends Component
     protected $listeners = ['uploadFile' => 'uploadFile'];
 
     public $folder_id = null;
+    public $folder = null;
     public $classifications = [];
     #[Validate('required|max:5000', as: 'document title')]
     public $name = null;
@@ -36,6 +38,8 @@ class UploadFile extends Component
         $this->reset(['name', 'control_no', 'classification', 'date_released', 'document', 'office_source']);
         $this->resetErrorBag();
         $this->folder_id = $folder_id;
+        $this->folder = Folder::find($folder_id);
+        $this->authorize('upload-file', $this->folder);
         $this->dispatch('show-upload-file-modal');
     }
 
@@ -45,6 +49,7 @@ class UploadFile extends Component
     }
 
     public function saveFile() {
+        $this->authorize('upload-file', $this->folder);
         $this->validate();
         if(File::where(['name' => $this->name, 'folder_id' => $this->folder_id])->exists())
         {

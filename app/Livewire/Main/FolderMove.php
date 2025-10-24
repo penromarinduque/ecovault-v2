@@ -18,6 +18,7 @@ class FolderMove extends Component
     public $folders = [];
 
     public function moveFolder($folder_id, $main_folder_id) {
+        $this->authorize('create', Folder::class);
         $this->to_move = Folder::find($folder_id);
         $this->folders = Folder::query()->where(['main_folder_id' => $main_folder_id, 'parent_folder_id' => null])->get();
         $this->main_folder_id = $main_folder_id;
@@ -27,6 +28,7 @@ class FolderMove extends Component
 
     public function openFolder($folderId) 
     {
+        $this->authorize('create', Folder::class);
         if($folderId == null) 
         {
             $this->folder = null;
@@ -38,6 +40,7 @@ class FolderMove extends Component
     }
 
     public function saveFolderLocation() {
+        $this->authorize('create', Folder::class);
         if($this->folder == null) {
             $this->to_move->parent_folder_id = null;
             $this->to_move->main_folder_id = $this->main_folder_id;

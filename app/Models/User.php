@@ -82,4 +82,13 @@ class User extends Authenticatable
         $roles = $this->roles;
         return $roles->contains('id', 3);
     }
+
+    public function encoderDesignations(){
+        return $this->hasMany(EncoderDesignation::class);
+    }
+
+    public function canEncodeMainFolder($main_folder_id){
+        $designations = $this->encoderDesignations;
+        return $designations->contains('main_folder_id', $main_folder_id);
+    }
 }

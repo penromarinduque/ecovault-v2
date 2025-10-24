@@ -17,12 +17,14 @@ class FolderRename extends Component
 
     public function renameFolder($folder_id) {
         $this->folder = Folder::find($folder_id);
+        $this->authorize('update', $this->folder);
         $this->name = $this->folder->name;
         $this->dispatch('show-rename-folder-modal');    
     }
 
     public function saveFolder() {
         $this->validate();
+        $this->authorize('update', $this->folder);
         $this->folder->name = $this->name;
         $this->folder->save();
         $this->dispatch('hide-rename-folder-modal');

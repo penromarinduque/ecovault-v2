@@ -108,7 +108,7 @@
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
                                                 <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
-                                                <button class="dropdown-item" type="button" wire:click="previewFile({{ $file->id }})">Preview</button>
+                                                <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
                                                 <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
                                                 <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
                                                 <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>

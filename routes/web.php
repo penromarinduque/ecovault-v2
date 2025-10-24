@@ -2,7 +2,9 @@
 
 use App\Livewire\Admin\User\UserIndex;
 use App\Livewire\Main\ViewFolder;
+use App\Models\File;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
@@ -29,6 +31,11 @@ Route::group(["prefix" => "main", "as" => "main."], function () {
         Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
     });
 });
+
+Route::get('preview/{id}', function ($id) {
+    $file = File::find($id);
+    return Storage::response('/uploads/'.$file->file_name, $file->name);
+})->name('preview');
 
 Route::get('validate-qr/{id}', function () {
     return "QR validations goes here";

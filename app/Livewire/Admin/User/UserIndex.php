@@ -32,6 +32,7 @@ class UserIndex extends Component
         Log::info('Editing role for user: ' . $user);
         $this->editRoleModalVisibility = true;
         $this->selectedUser = $user;
+        $this->authorize('update', $this->selectedUser);
         $this->dispatch('show-edit-role-modal');
     }
 
@@ -56,6 +57,7 @@ class UserIndex extends Component
 
     public function toggleRole($role_type_id)
     {
+        $this->authorize('update', $this->selectedUser);
         if (!$this->selectedUser) {
             notyf()->position('y', 'top')->error('User not selected!');
             return;
@@ -90,6 +92,7 @@ class UserIndex extends Component
     public function deleteUser(User $user)
     {
         // 
+        $this->authorize('delete', $user);
         Role::where('user_id', $user->id)->delete();
         $user->delete();
         notyf()->position('y', 'top')->success('User deleted successfully!');
@@ -97,6 +100,7 @@ class UserIndex extends Component
 
     public function render()
     {
+        $this->authorize('view-any', User::class);
         $users = User::query()
         ->with('roles', 'roles.roleType')
             ->where('name', 'like', '%' . $this->search . '%')
@@ -107,6 +111,7 @@ class UserIndex extends Component
     }
 
     public function toggleEncoderDesignation($user_id, $main_folder_id) {
+        $this->authorize('update', $this->selectedUser);
         $designation = EncoderDesignation::where('user_id', $user_id)->where('main_folder_id', $main_folder_id)->first();
         if($designation) {
             $designation->delete();

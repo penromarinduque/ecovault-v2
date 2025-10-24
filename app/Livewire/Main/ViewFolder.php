@@ -30,16 +30,19 @@ class ViewFolder extends Component
     public function navigateTo($folder_id) {
         $this->folder_id = $folder_id;
         $this->folder = Folder::where('id', $folder_id)->with('parentFolder')->first();
+        $this->authorize('view', $this->folder);
         Log::info($this->folder);
     }
 
     public function downloadFile($file_id) {
         $file = File::find($file_id);
+        $this->authorize('view', $file);
         return Storage::download('/uploads/'.$file->file_name, $file->name);
     }
 
     public function deleteFile($file_id) {
         $file = File::find($file_id);
+        $this->authorize('delete', $file);
         Storage::delete('/uploads/'.$file->file_name);
         $file->delete();
     }
@@ -47,6 +50,7 @@ class ViewFolder extends Component
     public function previewFile($file_id)
     {
         $file = File::findOrFail($file_id);
+        $this->authorize('view', $file);
         $path = 'uploads/' . $file->file_name;
 
         if (!Storage::exists($path)) {
@@ -73,6 +77,7 @@ class ViewFolder extends Component
         try {
             DB::transaction(function () use ($folder_id) {
                 $folder = Folder::find($folder_id);
+                $this->authorize('delete', $folder);
                 $folder->deleteWithChildren();
                 notyf()->position('y', 'top')->success('Folder deleted successfully!');
             });
@@ -123,6 +128,7 @@ class ViewFolder extends Component
     public function render()
     {
         // add gate here
+        $this->authorize('view', $this->folder);
         $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->get();
         $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->paginate(10) : [];
         return view('livewire.main.view-folder', compact('folders', 'files'));

@@ -35,6 +35,7 @@ class EditFile extends Component
     {
         $this->reset(['name', 'control_no', 'classification', 'date_released', 'document', 'office_source']);
         $this->file = File::find($file_id);
+        $this->authorize('update', $this->file);
         $this->name = $this->file->name;
         $this->office_source = $this->file->office_source;
         $this->control_no = $this->file->doc_control_no;
@@ -45,6 +46,7 @@ class EditFile extends Component
     }
 
     public function saveFile() {
+        $this->authorize('update', $this->file);
         try {
             $this->validate();
             if(File::where(['name' => $this->name, 'folder_id' => $this->file->folder_id])->whereNot('id', $this->file->id)->exists())   

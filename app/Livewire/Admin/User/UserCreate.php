@@ -19,6 +19,7 @@ class UserCreate extends Component
 
 
     public function showCreateUserModal(){
+        $this->authorize('create', User::class);
         $this->dispatch('show-create-user-modal');
         $this->reset(['name', 'email']);
         $this->resetErrorBag();
@@ -31,6 +32,7 @@ class UserCreate extends Component
     }
 
     public function saveUser(){
+        $this->authorize('create', User::class);
         $this->validate();
         $password = Str::random(8);
         $user = User::create([

@@ -23,6 +23,7 @@ class FolderCreate extends Component
 
     public function addFolder($main_folder_id, $parent_folder_id) 
     {
+        $this->authorize('create', Folder::class);
         Log::info('addFolder', [$main_folder_id, $parent_folder_id]);
         $this->main_folder_id = $main_folder_id;
         $this->parent_folder_id = $parent_folder_id;
@@ -33,6 +34,7 @@ class FolderCreate extends Component
     }
 
     public function saveFolder(){
+        $this->authorize('create', Folder::class);
         $this->validate();
         Folder::create([
             'name' => $this->name,
