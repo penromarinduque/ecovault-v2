@@ -81,54 +81,54 @@
     @if ($folder_id)
     <div class="card" >
         <div class="card-body">
-            <input type="text" class="form-control mb-3" placeholder="Search files..." wire:model.live.debounce.300ms="search">
-            
-                <div class="table-responsive" style="min-height: 800px !important;">
-                    <h6 class="font-weight-bold">Files </h6>
-                    <table class="table table-hover" >
-                        <thead>
+            <input type="text" class="form-control mb-3" placeholder="Search files..." wire:model.live.debounce.300ms="search" />
+        
+            <div class="table-responsive" style="min-height: 800px !important;">
+                <h6 class="font-weight-bold">Files </h6>
+                <table class="table table-hover" >
+                    <thead>
+                        <tr>
+                            <th width="30px"></th>
+                            <th>File</th>
+                            <th>Date Released</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($files as $file)
                             <tr>
-                                <th width="30px"></th>
-                                <th>File</th>
-                                <th>Date Released</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($files as $file)
-                                <tr>
-                                    <td>
-                                        <i class="{{ $file->icon }}"></i>
-                                    </td>
-                                    <td>{{ $file->name }}</td>
-                                    <td>{{ $file->date_released->format('M d, Y') }}</td>
-                                    <td>
-                                        @persist("file-dropdown-{{ $file->id }}")
-                                        <div class="btn-group" wire:ignore.self>
-                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
-                                                Options
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-                                                <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
-                                                <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
-                                                <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
-                                                <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
-                                                <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
-                                            </div>
+                                <td>
+                                    <i class="{{ $file->icon }}"></i>
+                                </td>
+                                <td>{{ $file->name }}</td>
+                                <td>{{ $file->date_released->format('M d, Y') }}</td>
+                                <td>
+                                    @persist("file-dropdown-{{ $file->id }}")
+                                    <div class="btn-group" wire:ignore.self>
+                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
+                                            Options
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
+                                            <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
+                                            <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
+                                            <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
+                                            <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
+                                            <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                         </div>
-                                        @endpersist
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">No files found for this folder.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                    {{ $files->links() }}
-                </div>
+                                    </div>
+                                    @endpersist
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No files found for this folder.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                {{ $files->links() }}
             </div>
         </div>
+    </div>
     @endif
 </div>
