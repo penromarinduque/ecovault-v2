@@ -94,7 +94,7 @@
                                 @foreach ($mainFolders as $mainFolder)
                                 <tr>
                                     <td>
-                                        <input type="checkbox" wire:change="toggleEncoderDesignation('{{ $selectedUser->id }}','{{ $mainFolder->id }}')">
+                                        <input type="checkbox" wire:change="toggleEncoderDesignation('{{ $selectedUser->id }}','{{ $mainFolder->id }}')" @if($selectedUser && $selectedUser->encoderDesignations->contains('main_folder_id', $mainFolder->id)) checked @endif>
                                     </td>
                                     <td>
                                         {{ $mainFolder->name }}

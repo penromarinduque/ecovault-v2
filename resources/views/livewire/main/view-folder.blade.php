@@ -20,7 +20,7 @@
             </button>
         </div>
         @endif
-        @if ($folder_id)
+        @if ($folder_id && auth()->user()->can("upload-file", [App\Models\Folder::class, $main_folder->id]))
         <div class="col-auto pr-0">
             <button class="btn btn-primary " wire:click="uploadFile({{ $folder_id }})">
                 <i class="fas fa-upload"></i> Upload File
@@ -78,10 +78,11 @@
         </div>
         @endforelse
     </div>
+    @if ($folder_id)
     <div class="card" >
         <div class="card-body">
             <input type="text" class="form-control mb-3" placeholder="Search files..." wire:model.live.debounce.300ms="search">
-            @if ($folder_id)
+            
                 <div class="table-responsive" style="min-height: 800px !important;">
                     <h6 class="font-weight-bold">Files </h6>
                     <table class="table table-hover" >
@@ -127,7 +128,7 @@
                     </table>
                     {{ $files->links() }}
                 </div>
-            @endif
+            </div>
         </div>
-    </div>
+    @endif
 </div>

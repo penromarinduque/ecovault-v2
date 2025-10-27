@@ -74,7 +74,7 @@ class User extends Authenticatable
     public function isEncoder(): bool
     {
         $roles = $this->roles;
-        return $roles->contains('id', 2);
+        return $roles->contains('role_type_id', 2);
     }
 
     public function isViewer(): bool

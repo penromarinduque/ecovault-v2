@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Folder;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Log;
 
 class FolderPolicy
 {
@@ -24,7 +25,7 @@ class FolderPolicy
         if($user->isAdmin()) {
             return true;
         }
-        if($user->isEncoder() && $user->canEncodeMainFolder($folder->main_folder_id)){ 
+        if($user->isEncoder() && $user->canEncodeMainFolder($folder->main_folder_id)) { 
             return true;
         }
         return false;
@@ -85,12 +86,12 @@ class FolderPolicy
         return false;
     }
 
-    public function uploadFile(User $user, Folder $folder): bool
+    public function uploadFile(User $user, $main_folder_id): bool
     {
         if($user->isAdmin()) {
             return true;
         }
-        if($user->isEncoder() && $user->canEncodeMainFolder($folder->main_folder_id)){ 
+        if($user->isEncoder() && $user->canEncodeMainFolder($main_folder_id)){ 
             return true;
         }
         return false;
