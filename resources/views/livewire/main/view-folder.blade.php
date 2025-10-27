@@ -102,6 +102,7 @@
                                     <td>{{ $file->name }}</td>
                                     <td>{{ $file->date_released->format('M d, Y') }}</td>
                                     <td>
+                                        @persist("file-dropdown-{{ $file->id }}")
                                         <div class="btn-group" wire:ignore.self>
                                             <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
                                                 Options
@@ -114,6 +115,7 @@
                                                 <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                             </div>
                                         </div>
+                                        @endpersist
                                     </td>
                                 </tr>
                             @empty

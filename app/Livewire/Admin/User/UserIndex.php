@@ -69,23 +69,13 @@ class UserIndex extends Component
             return;
         }
 
-        if ($this->selectedUser->roles->contains('role_type_id', $role_type_id)) {
-            Role::where('user_id', $this->selectedUser->id)
-                ->where('role_type_id', $role_type_id)
-                ->delete();
-            notyf()->position('y', 'top')->success('Role removed successfully!');
-        } else {
-            // Assign the role to the user
-            Role::where('user_id', $this->selectedUser->id)
-                ->where('role_type_id', $role_type_id)
-                ->firstOrCreate([
-                    'user_id' => $this->selectedUser->id,
-                    'role_type_id' => $role_type_id,
-                ]);
-            notyf()->position('y', 'top')->success('Role assigned successfully!');
-        }
+        Role::where('user_id', $this->selectedUser->id)->delete();
+        Role::create([
+            'user_id' => $this->selectedUser->id,
+            'role_type_id' => $role_type_id,
+        ]);
+        notyf()->position('y', 'top')->success('Role assigned successfully!');
 
-        // Refresh the selected user to reflect changes
         $this->selectedUser = User::with('roles', 'roles.roleType')->find($this->selectedUser->id);
     }
 
@@ -106,7 +96,6 @@ class UserIndex extends Component
             ->where('name', 'like', '%' . $this->search . '%')
             ->orWhere('email', 'like', '%' . $this->search . '%')
             ->paginate(10);
-
         return view('livewire.admin.user.user-index', compact('users'));
     }
 

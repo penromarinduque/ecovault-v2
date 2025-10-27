@@ -59,21 +59,22 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th width="30px"></th>
-                                    <th>Role</th>
+                                    <th >Roles</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($roleTypes as $roleType)
                                     <tr>
                                         <td>
-                                            <input type="checkbox" wire:change="toggleRole('{{ $roleType->id }}')" @if($selectedUser && $selectedUser->roles->contains('role_type_id', $roleType->id)) checked @endif>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input type="radio" id="role-radio-{{ $roleType->id }}" wire:change="toggleRole('{{ $roleType->id }}')" @if($selectedUser && $selectedUser->roles->contains('role_type_id', $roleType->id)) checked @endif value="{{ $roleType->id }}" name="customRadioInline" class="custom-control-input">
+                                                <label class="custom-control-label" for="role-radio-{{ $roleType->id }}">{{ $roleType->name }}</label>
+                                            </div>
                                         </td>
-                                        <td>{{ $roleType->name }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="2" class="text-center">No roles found for this user.</td>
+                                        <td colspan="1" class="text-center">No roles found for this user.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

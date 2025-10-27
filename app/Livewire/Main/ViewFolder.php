@@ -128,7 +128,9 @@ class ViewFolder extends Component
     public function render()
     {
         // add gate here
-        $this->authorize('view', $this->folder);
+        if($this->folder) {
+            $this->authorize('view', $this->folder);
+        }
         $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->get();
         $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->paginate(10) : [];
         return view('livewire.main.view-folder', compact('folders', 'files'));
