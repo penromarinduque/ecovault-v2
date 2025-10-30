@@ -32,6 +32,7 @@ class ViewFolder extends Component
         $this->folder = Folder::where('id', $folder_id)->with('parentFolder')->first();
         $this->authorize('view', $this->folder);
         Log::info($this->folder);
+        
     }
 
     public function downloadFile($file_id) {
@@ -117,6 +118,16 @@ class ViewFolder extends Component
     public function moveFile($file_id) 
     {
         $this->dispatch('moveFile', file_id: $file_id);
+    }
+
+    public function shareFile($file_id)
+    {
+
+    }
+
+    public function shareFolder($folder_id)
+    {
+        $this->dispatch('shareFolder', folder_id: $folder_id);
     }
 
     public function mount($main_folder_id)
