@@ -55,9 +55,29 @@
                         {{$folder->name}}
                     </a>
                     @if (auth()->user()->isAdmin())
-                    <div class="dropdown col-auto">
+                    <div x-data="{ open: false }" class="p-2" wire:ignore.self>
+                        <!-- Button -->
+                        <button @click="open = !open" class=" btn btn-light ">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </button>
+
+                        <!-- Dropdown menu -->
+                        <div
+                            style="z-index: 6;"
+                            x-show="open"
+                            @click.away="open = false"
+                            x-transition
+                            class="position-absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg"
+                        >
+                            <a class="dropdown-item" href="#" wire:click="renameFolder({{ $folder->id }})" ><i class="fa fa-i-cursor mr-2" aria-hidden="true"></i>Rename</a>
+                            <a class="dropdown-item" href="#" wire:click="moveFolder({{ $folder->id }}, {{ $main_folder_id }})" ><i class="fas fa-expand-arrows-alt mr-2" aria-hidden="true"></i>Move</a>
+                            <a class="dropdown-item" href="#" wire:click="shareFolder({{ $folder->id }})"><i class="fa fa-share mr-2" aria-hidden="true"></i>Share</a>
+                            <a class="dropdown-item text-danger" href="#" wire:confirm="Are you sure you want to delete this folder? All of the files and subfolders will be deleted." wire:loading.attr="disabled" wire:click="deleteFolder({{ $folder->id }})"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
+                        </div>
+                    </div>
+
+                    {{-- <div class="dropdown col-auto">
                         <button class="btn btn-light dropdown-toggle text-center" type="button" data-toggle="dropdown" aria-expanded="false">
-                            {{-- <i class="fas fa-ellipsis-h"></i> --}}
                         </button>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#" wire:click="renameFolder({{ $folder->id }})" ><i class="fa fa-i-cursor mr-2" aria-hidden="true"></i>Rename</a>
@@ -65,7 +85,7 @@
                             <a class="dropdown-item" href="#" wire:click="shareFolder({{ $folder->id }})"><i class="fa fa-share mr-2" aria-hidden="true"></i>Share</a>
                             <a class="dropdown-item text-danger" href="#" wire:confirm="Are you sure you want to delete this folder? All of the files and subfolders will be deleted." wire:loading.attr="disabled" wire:click="deleteFolder({{ $folder->id }})"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
                         </div>
-                    </div>
+                    </div> --}}
                     @endif
                 </div>
             </div>
@@ -106,7 +126,27 @@
                                 <td>{{ $file->date_released->format('M d, Y') }}</td>
                                 <td>
                                     @persist("file-dropdown-{{ $file->id }}")
-                                    <div class="btn-group" wire:ignore.self>
+                                    <div x-data="{ open: false }" class="relative" wire:ignore.self>
+                                        <!-- Button -->
+                                        <button @click="open = !open" class=" btn btn-light ">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+
+                                        <!-- Dropdown menu -->
+                                        <div
+                                            x-show="open"
+                                            @click.away="open = false"
+                                            x-transition
+                                            class="position-absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg"
+                                        >
+                                            <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
+                                            <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
+                                            <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
+                                            <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
+                                            <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
+                                        </div>
+                                    </div>
+                                    {{-- <div class="btn-group" wire:ignore.self>
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
                                             Options
                                         </button>
@@ -117,7 +157,7 @@
                                             <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
                                             <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                     @endpersist
                                 </td>
                             </tr>

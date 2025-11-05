@@ -9,12 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up() : void
     {
         Schema::create('shared_folders', function (Blueprint $table) {
             $table->id();
             $table->string('share_type', 20);
             $table->foreignId('folder_id');
+            $table->foreignId('user_id');
             $table->timestamps();
         });
     }
@@ -22,7 +23,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down() : void
     {
         Schema::dropIfExists('shared_folders');
     }

@@ -255,13 +255,12 @@
                 <!-- User profile and search -->
                 <!-- ============================================================== -->
                 @persist("user-dropdown")
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle waves-effect waves-dark pro-pic" href=""
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <li class="nav-item dropdown"  wire:ignore.self>
+                    <a class="nav-link dropdown-toggle waves-effect waves-dark pro-pic" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" @click="open = !open">
                         <img src="https://api.dicebear.com/9.x/identicon/svg?seed={{ auth()->user()->name }}" alt="user" class="rounded-circle" width="40">
                         <span class="m-l-5 font-medium d-none d-sm-inline-block">{{ auth()->user()->name }} <i class="mdi mdi-chevron-down"></i></span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY">
+                    <div class="dropdown-menu dropdown-menu-right user-dd animated flipInY" >
                         <span class="with-arrow">
                             <span class="bg-primary"></span>
                         </span>
@@ -280,10 +279,6 @@
                                 <i class="ti-user m-r-5 m-l-5"></i> 
                                 My Profile
                             </a>
-                            {{-- <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="ti-wallet m-r-5 m-l-5"></i> My Balance</a>
-                            <a class="dropdown-item" href="javascript:void(0)">
-                                <i class="ti-email m-r-5 m-l-5"></i> Inbox</a> --}}
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{route('profile.edit')}}" wire:navigate>
                                 <i class="ti-settings m-r-5 m-l-5"></i> Account Setting</a>
@@ -297,6 +292,7 @@
                         </div>
                     </div>
                 </li>
+
                 @endpersist
                 <!-- ============================================================== -->
                 <!-- User profile and search -->

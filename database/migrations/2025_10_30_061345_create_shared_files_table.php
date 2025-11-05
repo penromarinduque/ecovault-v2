@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('share_type', 20);
             $table->foreignId('file_id');
+            $table->foreignId('user_id');
             $table->timestamps();
         });
     }
