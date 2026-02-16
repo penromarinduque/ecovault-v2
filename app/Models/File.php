@@ -118,22 +118,64 @@ class File extends Model
     /**
      * Embed QR Code in a PDF file
      */
+    // private function embedQrCodeInPdf($filePath, $qrCodePath)
+    // {
+    //     $absolutePdfPath = Storage::path($filePath);
+    //     $absoluteQrPath = Storage::path($qrCodePath);
+
+    //     if (!file_exists($absolutePdfPath)) {
+    //         throw new Exception("PDF file not found at: {$absolutePdfPath}");
+    //     }
+
+    //     if (!file_exists($absoluteQrPath)) {
+    //         throw new Exception("QR Code file not found at: {$absoluteQrPath}");
+    //     }
+
+    //     try {
+    //         $pdf = new Fpdi();
+    //         $pageCount = $pdf->setSourceFile($absolutePdfPath);
+
+    //         for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+    //             $templateId = $pdf->importPage($pageNo);
+    //             $size = $pdf->getTemplateSize($templateId);
+
+    //             $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
+    //             $pdf->useTemplate($templateId);
+
+    //             // Scale QR relative to page size (12% width)
+    //             $qrWidth = min($size['width'], $size['height']) * 0.12;
+    //             $qrHeight = $qrWidth;
+    //             $margin = 10;
+
+    //             $x = $size['width'] - $qrWidth - $margin;
+    //             $y = $size['height'] - $qrHeight - $margin;
+
+    //             $pdf->Image($absoluteQrPath, $x, $y, $qrWidth, $qrHeight);
+    //         }
+
+    //         // Overwrite the original PDF
+    //         $pdf->Output('F', $absolutePdfPath);
+
+    //         return $filePath;
+    //     } catch (Exception $e) {
+    //         Log::error('Error embedding QR into PDF: ' . $e->getMessage());
+    //         return null;
+    //     }
+    // }
     private function embedQrCodeInPdf($filePath, $qrCodePath)
     {
-        $absolutePdfPath = Storage::path($filePath);
-        $absoluteQrPath = Storage::path($qrCodePath);
-
-        if (!file_exists($absolutePdfPath)) {
-            throw new Exception("PDF file not found at: {$absolutePdfPath}");
-        }
-
-        if (!file_exists($absoluteQrPath)) {
-            throw new Exception("QR Code file not found at: {$absoluteQrPath}");
-        }
-
         try {
+            // 1. Create temporary local paths
+            $tempPdf = tempnam(sys_get_temp_dir(), 'pdf_');
+            $tempQr = tempnam(sys_get_temp_dir(), 'qr_');
+
+            // 2. Download contents from MinIO to the temp files
+            file_put_contents($tempPdf, Storage::disk('s3')->get($filePath));
+            file_put_contents($tempQr, Storage::disk('s3')->get($qrCodePath));
+
             $pdf = new Fpdi();
-            $pageCount = $pdf->setSourceFile($absolutePdfPath);
+            // 3. Point FPDI to the local temp file
+            $pageCount = $pdf->setSourceFile($tempPdf);
 
             for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
                 $templateId = $pdf->importPage($pageNo);
@@ -142,19 +184,23 @@ class File extends Model
                 $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
                 $pdf->useTemplate($templateId);
 
-                // Scale QR relative to page size (12% width)
                 $qrWidth = min($size['width'], $size['height']) * 0.12;
-                $qrHeight = $qrWidth;
                 $margin = 10;
-
                 $x = $size['width'] - $qrWidth - $margin;
                 $y = $size['height'] - $qrHeight - $margin;
 
-                $pdf->Image($absoluteQrPath, $x, $y, $qrWidth, $qrHeight);
+                $pdf->Image($tempQr, $x, $y, $qrWidth, $qrWidth);
             }
 
-            // Overwrite the original PDF
-            $pdf->Output('F', $absolutePdfPath);
+            // 4. Save the modified PDF back to the temp local file
+            $pdf->Output('F', $tempPdf);
+
+            // 5. Upload the modified file back to MinIO
+            Storage::disk('s3')->put($filePath, file_get_contents($tempPdf));
+
+            // 6. Cleanup temp files
+            unlink($tempPdf);
+            unlink($tempQr);
 
             return $filePath;
         } catch (Exception $e) {
