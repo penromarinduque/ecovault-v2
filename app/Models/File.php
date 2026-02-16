@@ -103,7 +103,7 @@ class File extends Model
             $qrCode->resize(150, 150);
 
             // Place QR at bottom-right corner with 10px margin
-            $image->place($qrCode, 'bottom-right', 10, 10);
+            // $image->place($qrCode, 'bottom-right', 10, 10);
 
             // Save image back in place
             $image->save($absoluteFilePath);
@@ -189,7 +189,7 @@ class File extends Model
                 $x = $size['width'] - $qrWidth - $margin;
                 $y = $size['height'] - $qrHeight - $margin;
 
-                $pdf->Image($tempQr, $x, $y, $qrWidth, $qrWidth);
+                // $pdf->Image($tempQr, $x, $y, $qrWidth, $qrWidth);
             }
 
             // 4. Save the modified PDF back to the temp local file
