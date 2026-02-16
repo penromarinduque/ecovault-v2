@@ -115,7 +115,7 @@
     </div>
 
     <div class="text-center mb-5">
-        <h2 class="main-title">Document Security and Digital Archiving System</h2>
+        <h2 class="main-title">QR-Based Electronic Document Authentication System</h2>
     </div>
 
     @if (Route::has('login'))

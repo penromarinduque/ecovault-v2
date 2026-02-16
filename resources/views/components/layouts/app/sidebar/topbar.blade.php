@@ -9,7 +9,7 @@
             <!-- Logo -->
             <!-- ============================================================== -->
             <div class="navbar-brand">
-                <a href="index.html" class="logo">
+                <a href="{{ route('home') }}" class="logo" style="">
                     <!-- Logo icon -->
                     <b class="logo-icon">
                         <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
@@ -21,6 +21,8 @@
                     <!--End Logo icon -->
                     <!-- Logo text -->
                     <span class="logo-text">
+                        {{-- <span class="text-light" style="font-size: 10px">QR-Based Electronic Document <br> Authentication System</span> --}}
+                        
                         <!-- dark Logo text -->
                         <img src="{{ asset('assets/images/logo-text.png') }}" alt="homepage" class="dark-logo" />
                         <!-- Light Logo text -->
