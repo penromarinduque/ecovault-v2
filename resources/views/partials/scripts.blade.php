@@ -47,6 +47,11 @@
     }
 
 </script>
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
 @yield('scripts')
 @livewireScripts
 

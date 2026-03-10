@@ -26,6 +26,12 @@ class DocClassificationSeeder extends Seeder
                 "name" => "Simple",
                 "created_at" => now(),
                 "updated_at" => now()
+            ],
+            [
+                "id" => 3,
+                "name" => "Complex",
+                "created_at" => now(),
+                "updated_at" => now()
             ]
         ]);
     }

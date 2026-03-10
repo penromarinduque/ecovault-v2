@@ -124,9 +124,40 @@
                                 </td>
                                 <td>{{ $file->name }}</td>
                                 <td>{{ $file->date_released->format('M d, Y') }}</td>
-                                <td>
-                                    @persist("file-dropdown-{{ $file->id }}")
-                                    <div x-data="{ open: false }" class="relative" wire:ignore.self>
+                                <td >
+                                    <div class="d-flex gap-1 g-1">
+                                        <div class="d-flex align-items-center" wire:ignore.self>
+                                            <div class="btn-group" role="group" >
+                                                <button type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip">
+                                                    <i class="fa-solid fa-qrcode"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip">
+                                                    <i class="fa-solid fa-barcode"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-primary" title="Barcode & QR Code" data-toggle="tooltip">
+                                                    <i class="fa-solid fa-barcode"></i> +
+                                                    <i class="fa-solid fa-qrcode"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button class="m-1 btn-outline-primary btn " type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-download"></i>
+                                        </button>
+                                        <a class="m-1 btn btn-outline-primary" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}" title="Preview" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <button class="m-1 btn btn-outline-primary" type="button" wire:click="moveFile({{ $file->id }})" title="Move" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                                        </button>
+                                        <button class="m-1 btn btn-outline-primary" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                    {{-- @persist("file-dropdown-{{ $file->id }}") --}}
+                                    {{-- <div x-data="{ open: false }" class="relative" wire:ignore.self>
                                         <!-- Button -->
                                         <button @click="open = !open" class=" btn btn-light ">
                                             <i class="fas fa-ellipsis-h"></i>
@@ -145,7 +176,7 @@
                                             <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
                                             <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                         </div>
-                                    </div>
+                                    </div> --}}
                                     {{-- <div class="btn-group" wire:ignore.self>
                                         <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
                                             Options
@@ -158,7 +189,7 @@
                                             <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                         </div>
                                     </div> --}}
-                                    @endpersist
+                                    {{-- @endpersist --}}
                                 </td>
                             </tr>
                         @empty
