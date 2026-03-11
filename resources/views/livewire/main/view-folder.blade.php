@@ -143,6 +143,7 @@
                                             <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
                                             <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
                                             <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
+                                            <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">Attach QR & Barcode</a>
                                             <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
                                         </div>
                                     </div>

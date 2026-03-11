@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\User\UserIndex;
+use App\Livewire\Main\AttachQr;
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::group(["prefix" => "admin", "as" => "admin."], function () {
 Route::group(["prefix" => "main", "as" => "main."], function () {
     Route::group(["prefix" => "folders", "as" => "folders."], function () {
         Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
+        Route::get('/attachqr/{main_file_id}', AttachQr::class)->middleware(['auth', 'verified'])->name('attachqr');
     });
 });
 
