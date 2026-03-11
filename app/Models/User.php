@@ -80,7 +80,7 @@ class User extends Authenticatable
     public function isViewer(): bool
     {
         $roles = $this->roles;
-        return $roles->contains('id', 3);
+        return $roles->contains('role_type_id', 3);
     }
 
     public function encoderDesignations(){
@@ -89,6 +89,7 @@ class User extends Authenticatable
 
     public function canEncodeMainFolder($main_folder_id){
         $designations = $this->encoderDesignations;
+        // return true;
         return $designations->contains('main_folder_id', $main_folder_id);
     }
 }

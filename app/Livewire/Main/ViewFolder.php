@@ -27,6 +27,10 @@ class ViewFolder extends Component
     public $folder;
     public $search = '';
 
+    public $fileSortBy = 'name';
+    public $fileSortOrder = 'asc';
+    public $folderSortOrder = 'desc';
+
     public function navigateTo($folder_id) {
         $this->folder_id = $folder_id;
         $this->folder = Folder::where('id', $folder_id)->with('parentFolder')->first();
@@ -99,6 +103,21 @@ class ViewFolder extends Component
         $this->resetPage();
     }
 
+    public function updatingFileSortBy()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFileSortOrder()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFolderSortOrder()
+    {
+        $this->resetPage();
+    }
+
     public function renameFolder($folder_id)
     {
         $this->dispatch('renameFolder', folder_id: $folder_id);
@@ -144,8 +163,8 @@ class ViewFolder extends Component
         if($this->folder) {
             $this->authorize('view', $this->folder);
         }
-        $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->get();
-        $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->paginate(10) : [];
+        $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->orderBy("name", $this->folderSortOrder)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->orderBy("name", $this->folderSortOrder)->get();
+        $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->orderBy($this->fileSortBy, $this->fileSortOrder)->paginate(10) : [];
         return view('livewire.main.view-folder', compact('folders', 'files'));
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\User\UserIndex;
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\Features;
@@ -12,9 +14,7 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
     Route::view('test', 'test.test')
         ->middleware(['auth', 'verified'])
@@ -70,3 +70,16 @@ require __DIR__.'/auth.php';
 Route::get("generate-password/{password}", function($password){
     return bcrypt($password);
 });
+
+Route::get("pdf-page/{barcode_no}", function(Request $request, $barcode_no){
+    $file = File::where("barcode_no", $barcode_no)->first();
+    $ff = Storage::response('/uploads/'.$file->file_name, $file->name);
+    $fileName = Storage::temporaryUrl('/uploads/' . $file->file_name, now()->addMinutes(60));
+    $imagick = new Imagick();
+    // return $fileName;
+    
+    $imagick->readImage($fileName);
+    // $imagick->readImage($fileName);
+    $imagick = $imagick->flattenImages();
+    return "test";
+})->name('pdf-page');
