@@ -27,6 +27,11 @@ Route::group(["prefix" => "admin", "as" => "admin."], function () {
 });
 
 Route::group(["prefix" => "main", "as" => "main."], function () {
+    Route::get('get-qr-and-barcode/{id}', function($id) {
+        $file = File::find($id);
+        return view('downloadQrAndBarcode', ['file' => $file]);
+    })->name('get-qr-and-barcode');
+
     Route::group(["prefix" => "folders", "as" => "folders."], function () {
         Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
     });

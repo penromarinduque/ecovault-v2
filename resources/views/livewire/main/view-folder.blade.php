@@ -128,16 +128,16 @@
                                     <div class="d-flex gap-1 g-1">
                                         <div class="d-flex align-items-center" wire:ignore.self>
                                             <div class="btn-group" role="group" >
-                                                <button type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip">
+                                                <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => $file->barcode_no]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
                                                     <i class="fa-solid fa-qrcode"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip">
+                                                </a>
+                                                <a type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip" href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}" target="_blank">
                                                     <i class="fa-solid fa-barcode"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-primary" title="Barcode & QR Code" data-toggle="tooltip">
+                                                </a>
+                                                <a type="button" class="btn btn-primary" title="Barcode & QR Code" data-toggle="tooltip" href="{{ route('main.get-qr-and-barcode', ['id' => $file->id]) }}" target="_blank">
                                                     <i class="fa-solid fa-barcode"></i> +
                                                     <i class="fa-solid fa-qrcode"></i>
-                                                </button>
+                                                </a>
                                             </div>
                                         </div>
                                         <button class="m-1 btn-outline-primary btn " type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
@@ -156,40 +156,6 @@
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     </div>
-                                    {{-- @persist("file-dropdown-{{ $file->id }}") --}}
-                                    {{-- <div x-data="{ open: false }" class="relative" wire:ignore.self>
-                                        <!-- Button -->
-                                        <button @click="open = !open" class=" btn btn-light ">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
-
-                                        <!-- Dropdown menu -->
-                                        <div
-                                            x-show="open"
-                                            @click.away="open = false"
-                                            x-transition
-                                            class="position-absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg"
-                                        >
-                                            <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
-                                            <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
-                                            <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
-                                            <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
-                                            <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
-                                        </div>
-                                    </div> --}}
-                                    {{-- <div class="btn-group" wire:ignore.self>
-                                        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false">
-                                            Options
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-                                            <button class="dropdown-item" type="button" wire:click="downloadFile({{ $file->id }})">Download</button>
-                                            <a class="dropdown-item" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}">Preview</a>
-                                            <button class="dropdown-item" type="button" wire:click="moveFile({{ $file->id }})">Move</button>
-                                            <button class="dropdown-item" type="button" wire:click="editFile({{ $file->id }})">Edit</button>
-                                            <button class="dropdown-item text-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})">Delete</button>
-                                        </div>
-                                    </div> --}}
-                                    {{-- @endpersist --}}
                                 </td>
                             </tr>
                         @empty
