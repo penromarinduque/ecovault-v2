@@ -102,55 +102,6 @@
                         <p style="font-size: 36px; color: #555; font-weight: 300; margin: 0;">No file selected</p>
                     @endif
                 </div>
-
-                <!-- QR and Barcode Section -->
-                <div style="width: 100%; max-width: 500px;">
-                    <div class="card border-light" style="box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <div class="card-body p-4">
-                            <h5 class="card-title font-weight-bold mb-4">Bar Code and QR Code</h5>
-                            
-                            <div class="row">
-                                <!-- Barcode Column -->
-                                <div class="col-md-6 text-center mb-md-0 mb-3">
-                                    <div style="background-color: #e9ecef; padding: 20px; margin-bottom: 10px; border-radius: 4px; min-height: 100px; display: flex; align-items: center; justify-content: center;">
-                                        @if($file && $file->barcode)
-                                            <img src="{{ $file->barcode }}" alt="Barcode" style="max-height: 70px; max-width: 100%;">
-                                        @else
-                                            <p class="text-muted" style="font-size: 12px;">Barcode will appear here</p>
-                                        @endif
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-primary" wire:click="generateBarcode">
-                                        <i class="fas fa-plus mr-1"></i> Generate Barcode
-                                    </button>
-                                </div>
-
-                                <!-- QR Code Column -->
-                                <div class="col-md-6 text-center">
-                                    <div style="background-color: #e9ecef; padding: 20px; margin-bottom: 10px; border-radius: 4px; min-height: 100px; display: flex; align-items: center; justify-content: center;">
-                                        @if($file && $file->qr_code)
-                                            <img src="{{ $file->qr_code }}" alt="QR Code" style="max-height: 70px; max-width: 100%;">
-                                        @else
-                                            <p class="text-muted" style="font-size: 12px;">QR Code will appear here</p>
-                                        @endif
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-primary" wire:click="generateQr">
-                                        <i class="fas fa-plus mr-1"></i> Generate QR Code
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="mt-4">
-                                <button class="btn btn-success btn-block mb-2">
-                                    <i class="fas fa-save mr-1"></i> Save Changes
-                                </button>
-                                <a href="{{ route('main.folders.show', ['main_folder_id' => $file->folder_id]) }}" class="btn btn-secondary btn-block">
-                                    <i class="fas fa-arrow-left mr-1"></i> Back to Folder
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

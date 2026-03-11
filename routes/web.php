@@ -28,6 +28,11 @@ Route::group(["prefix" => "admin", "as" => "admin."], function () {
 });
 
 Route::group(["prefix" => "main", "as" => "main."], function () {
+    Route::get('get-qr-and-barcode/{id}', function($id) {
+        $file = File::find($id);
+        return view('downloadQrAndBarcode', ['file' => $file]);
+    })->name('get-qr-and-barcode');
+
     Route::group(["prefix" => "folders", "as" => "folders."], function () {
         Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
         Route::get('/attachqr/{main_file_id}', AttachQr::class)->middleware(['auth', 'verified'])->name('attachqr');
@@ -63,3 +68,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get("generate-password/{password}", function($password){
+    return bcrypt($password);
+});
