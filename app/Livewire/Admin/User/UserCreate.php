@@ -17,7 +17,6 @@ class UserCreate extends Component
     #[Validate('required|email|unique:users,email|max:255')]
     public $email = '';
 
-
     public function showCreateUserModal(){
         $this->authorize('create', User::class);
         $this->dispatch('show-create-user-modal');
