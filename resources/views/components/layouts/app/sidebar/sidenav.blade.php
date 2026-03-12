@@ -8,21 +8,27 @@
         <nav class="sidebar-nav">
             <ul id="sidebarnav">
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link ">
+                    <a href="{{ route("dashboard") }}" class="sidebar-link " wire:navigate>
                         <i class="mdi mdi-view-dashboard"></i>
                         <span class="hide-menu"> Dashboard </span>
                     </a>
                 </li>
-                <li class="nav-small-cap">
-                    <i class="mdi mdi-dots-horizontal"></i>
-                    <span class="hide-menu">Admin</span>
-                </li>
-                <li class="sidebar-item">
-                    <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="fas fa-users"></i>
-                        <span class="hide-menu"> Users </span>
-                    </a>
-                </li>
+                @if (
+                    auth()->user()->can("view-any", App\Models\User::class)
+                )
+                    <li class="nav-small-cap">
+                        <i class="mdi mdi-dots-horizontal"></i>
+                        <span class="hide-menu">Admin</span>
+                    </li>
+                @endif
+                @can('view-any', App\Models\User::class)
+                    <li class="sidebar-item">
+                        <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <i class="fas fa-users"></i>
+                            <span class="hide-menu"> Users </span>
+                        </a>
+                    </li>
+                @endcan
                 {{-- <li class="sidebar-item">
                     <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)"
                         aria-expanded="false">

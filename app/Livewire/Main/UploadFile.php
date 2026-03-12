@@ -47,7 +47,7 @@ class UploadFile extends Component
         $this->resetErrorBag();
         $this->folder_id = $folder_id;
         $this->folder = Folder::find($folder_id);
-        $this->authorize('upload-file', $this->folder);
+        $this->authorize('upload-file', [Folder::class, $this->folder->main_folder_id]);
         $this->dispatch('show-upload-file-modal');
     }
 
@@ -86,7 +86,7 @@ class UploadFile extends Component
     }
 
     public function saveFile() {
-        $this->authorize('upload-file', $this->folder);
+        $this->authorize('upload-file', [Folder::class, $this->folder->main_folder_id]);
         $this->validate();
         if(File::where(['name' => $this->name, 'folder_id' => $this->folder_id])->exists())
         {
