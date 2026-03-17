@@ -1,45 +1,45 @@
 <div class="main" style="padding: 20px;">
-    <div class="content-container" style=" display: flex">
+    <div class="content-container" style="display: flex" >
         <!-- Left Sidebar Panel -->
-        <div class="col-12 col-lg-3" style="height: fit-content;">
-        <!-- Document Information -->
-        <div class="document-information-container mb-5" 
-            style="background-color: #ebebeb; padding: 20px; border-radius: 5px; height: fit-content;">
-            <div class="mb-2">
-                <label class="m-0 font-weight-bold">Document Title:</label>
-                <p class="m-0" style="word-break: break-word;">
-                    {{ $document_meta['title'] ?? 'N/A' }}
-                </p>
+        <div id="left-side-panel" class="col-12 col-lg-3" style=" fit-content; align-self: flex-start;">
+            <!-- Document Information -->
+            <div class="document-information-container mb-5" 
+                style="background-color: #ebebeb; padding: 20px; border-radius: 5px; height: fit-content;">
+                <div class="mb-2">
+                    <label class="m-0 font-weight-bold">Document Title:</label>
+                    <p class="m-0" style="word-break: break-word;">
+                        {{ $document_meta['title'] ?? 'N/A' }}
+                    </p>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="m-0 font-weight-bold">Office Source:</label>
+                    <p class="m-0" style="word-break: break-word;">
+                        {{ $document_meta['office_source'] ?? 'N/A' }}
+                    </p>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="m-0 font-weight-bold">Control Number:</label>
+                    <p class="m-0" style="word-break: break-word;">
+                        {{ $document_meta['control_no'] ?? 'N/A' }}
+                    </p>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="m-0 font-weight-bold">Classification:</label>
+                    <p class="m-0" style="word-break: break-word;">
+                        {{ $document_meta['classification'] ?? 'N/A' }}
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="m-0 font-weight-bold">Date Released:</label>
+                    <p class="m-0 flex-grow-1 text-wrap">
+                        {{ $document_meta['date_released'] ?? 'N/A' }}
+                    </p>
+                </div>
             </div>
-            
-            <div class="mb-2">
-                <label class="m-0 font-weight-bold">Office Source:</label>
-                <p class="m-0" style="word-break: break-word;">
-                    {{ $document_meta['office_source'] ?? 'N/A' }}
-                </p>
-            </div>
-            
-            <div class="mb-2">
-                <label class="m-0 font-weight-bold">Control Number:</label>
-                <p class="m-0" style="word-break: break-word;">
-                    {{ $document_meta['control_no'] ?? 'N/A' }}
-                </p>
-            </div>
-            
-            <div class="mb-2">
-                <label class="m-0 font-weight-bold">Classification:</label>
-                <p class="m-0" style="word-break: break-word;">
-                    {{ $document_meta['classification'] ?? 'N/A' }}
-                </p>
-            </div>
-            
-            <div>
-                <label class="m-0 font-weight-bold">Date Released:</label>
-                <p class="m-0 flex-grow-1 text-wrap">
-                    {{ $document_meta['date_released'] ?? 'N/A' }}
-                </p>
-            </div>
-        </div>
 
             <!-- Paper Size and Print Options -->
             <div class="mb-3">
@@ -51,13 +51,13 @@
                 </select>
             </div>
 
-            <button wire:click="print" class="btn btn-primary btn-block mt-3">
+            <button id="print-btn" class="btn btn-primary btn-block mt-3">
                 <i class="fas fa-print mr-2"></i> Print
             </button>
         </div>
 
         <!-- Main Content Area -->
-        <div class="col-12 col-lg-9">
+        <div id="main-content" class="col-12 col-lg-9">
             <div style="background-color: #f9f9f9; padding: 40px; border-radius: 5px; min-height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
                 
                 <!-- Content Display Area -->
@@ -82,8 +82,210 @@
                             @else
                                 <p class="text-muted">Error loading image.</p>
                             @endif
+
                         @elseif($mime === 'application/pdf')
-                            <embed src="{{ $url }}" type="application/pdf" width="100%" height="400px">
+                        @php
+                            $path = 'uploads/' . $file->file_name;
+                            $pdfUrl = url('storage/' . $path);
+                        @endphp
+
+                        {{-- PDF Container --}}
+                        <div id="pdf-paper" style="background:white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); transition: all 0.3s ease;">
+                            <canvas id="pdf-canvas" style="display:block; width:100%; height:100%;"></canvas>
+                        </div>
+
+                        {{-- Pagination --}}
+                        <div class="d-flex justify-content-center align-items-center mt-2" style="gap:8px;">
+                            <button id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>&#8592; Prev</button>
+                            <span id="pdf-page-info" class="small text-muted">
+                                Page <span id="pdf-page-num">1</span> of <span id="pdf-page-count">–</span>
+                            </span>
+                            <button id="pdf-next" class="btn btn-sm btn-outline-secondary">Next &#8594;</button>
+                        </div>
+
+                        {{-- Print Styles --}}
+                        <style id="print-styles">
+                            @media print {
+                                @page {
+                                    margin: 0; 
+                                    padding: 0;
+                                }
+
+                                body * { visibility: hidden; }
+
+                                #pdf-paper, #pdf-paper * { 
+                                    visibility: visible; 
+                                }
+
+                                #pdf-paper {
+                                    position: fixed;
+                                    top: 0;
+                                    left: 0;
+                                    width: 100% !important;
+                                    height: 100% !important;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    box-shadow: none !important;
+                                }
+
+                                #pdf-canvas {
+                                    width: 100% !important;
+                                    height: auto !important;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                }
+                            }
+                        </style>
+
+                    <script>
+                        (function () {
+                            const PDF_URL = @json($pdfUrl);
+
+                            // Paper sizes in mm → converted to px at 96dpi
+                            // 1mm = 3.7795275591px
+                            const PAPER_SIZES = {
+                                'A4':    { width: 794,  height: 1123 }, // 210mm x 297mm
+                                'Short': { width: 816,  height: 1056 }, // 215.9mm x 279.4mm (Letter)
+                                'Long':  { width: 816,  height: 1344 }, // 215.9mm x 355.6mm (Legal)
+                            };
+
+                            const canvas      = document.getElementById('pdf-canvas');
+                            const ctx         = canvas.getContext('2d');
+                            const paper       = document.getElementById('pdf-paper');
+                            const pageNumEl   = document.getElementById('pdf-page-num');
+                            const pageCountEl = document.getElementById('pdf-page-count');
+                            const prevBtn     = document.getElementById('pdf-prev');
+                            const nextBtn     = document.getElementById('pdf-next');
+                            const paperSelect = document.getElementById('paperSize');
+
+                            let pdfDoc      = null;
+                            let currentPage = 1;
+                            let renderTask  = null;
+                            let currentSize = paperSelect ? paperSelect.value : 'A4';
+
+                            // Apply paper size to the wrapper div
+                           function applyPaperSize(size) {
+                                const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
+                                paper.style.width  = dim.width  + 'px';
+                                paper.style.height = dim.height + 'px';
+
+                                const pageSizeMap = { 'A4': 'A4', 'Short': 'letter', 'Long': 'legal' };
+                                const printStyle  = document.getElementById('print-styles');
+                                printStyle.innerHTML = `
+                                    @media print {
+                                        @page {
+                                            size: ${pageSizeMap[size]};
+                                            margin: 0;
+                                            padding: 0;
+                                        }
+                                        body * { visibility: hidden; }
+                                        #pdf-paper, #pdf-paper * { visibility: visible; }
+                                        #pdf-paper {
+                                            position: fixed;
+                                            top: 0; left: 0;
+                                            width: 100% !important;
+                                            height: 100% !important;
+                                            margin: 0 !important;
+                                            padding: 0 !important;
+                                            box-shadow: none !important;
+                                        }
+                                        #pdf-canvas {
+                                            width: 100% !important;
+                                            height: auto !important;
+                                            margin: 0 !important;
+                                            padding: 0 !important;
+                                        }
+                                    }
+                                `;
+                            }
+
+                            function renderPage(num) {
+                                if (!pdfDoc) return;
+                                pdfDoc.getPage(num).then(function (page) {
+                                    const dim        = PAPER_SIZES[currentSize] || PAPER_SIZES['A4'];
+                                    const paperW     = dim.width  - 16;
+                                    const paperH     = dim.height - 16;
+                                    const pageVp     = page.getViewport({ scale: 1 });
+
+                                    // Scale to fit width first, then check if height fits too
+                                    let scale        = paperW / pageVp.width;
+                                    const scaledH    = pageVp.height * scale;
+
+                                    // If scaled height exceeds paper height, scale down to fit height instead
+                                    if (scaledH > paperH) {
+                                        scale = paperH / pageVp.height;
+                                    }
+
+                                    const viewport   = page.getViewport({ scale });
+                                    canvas.width     = viewport.width;
+                                    canvas.height    = viewport.height;
+
+                                    // ✅ No longer overriding paper height here — applyPaperSize() controls it
+                                    if (renderTask) { renderTask.cancel(); }
+
+                                    renderTask = page.render({ canvasContext: ctx, viewport });
+                                    renderTask.promise.then(function () {
+                                        renderTask = null;
+                                        pageNumEl.textContent = num;
+                                        prevBtn.disabled = num <= 1;
+                                        nextBtn.disabled = num >= pdfDoc.numPages;
+                                    }).catch(function (err) {
+                                        if (err.name !== 'RenderingCancelledException') {
+                                            console.error('PDF render error:', err);
+                                        }
+                                    });
+                                });
+                            }
+
+                            function initPdf() {
+                                if (typeof window.pdfjsLib === 'undefined') {
+                                    setTimeout(initPdf, 100);
+                                    return;
+                                }
+
+                                window.pdfjsLib.getDocument(PDF_URL).promise
+                                    .then(function (pdf) {
+                                        pdfDoc = pdf;
+                                        pageCountEl.textContent = pdf.numPages;
+                                        applyPaperSize(currentSize);
+                                        renderPage(currentPage);
+                                    })
+                                    .catch(function (err) {
+                                        document.getElementById('pdf-paper').innerHTML =
+                                            '<p class="text-danger small p-3">Failed to load PDF: ' + err.message + '</p>';
+                                    });
+                            }
+
+                            const printButton = document.querySelector('#print-btn');
+                            if (printButton) {
+                                printButton.addEventListener('click', () => {
+                                    window.print();
+                                });
+                            }
+
+                            // Listen for paper size change
+                            if (paperSelect) {
+                                paperSelect.addEventListener('change', function(){
+                                    currentSize = this.value;
+                                    applyPaperSize(currentSize);
+                                    renderPage(currentPage);
+                                });
+                            }
+
+                            prevBtn.addEventListener('click', function (){
+                                if (currentPage > 1) { renderPage(--currentPage); }
+                            });
+
+                            nextBtn.addEventListener('click', function (){
+                                if (pdfDoc && currentPage < pdfDoc.numPages) { renderPage(++currentPage); }
+                            });
+
+                            // Set initial paper size and load PDF
+                            applyPaperSize(currentSize);
+                            initPdf();
+                        })();
+                    </script>
+
                         @elseif(str_starts_with($mime, 'text/'))
                             @php
                                 try {

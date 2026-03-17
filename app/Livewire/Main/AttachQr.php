@@ -22,8 +22,8 @@ class AttachQr extends Component
         // Load document metadata
         $this->document_meta = [
             'title' => $this->file->name,
-            'office_source' => $this->file->folder->name ?? 'N/A',
-            'control_no' => $this->file->id,
+            'control_no' => $this->file->doc_control_no,
+            'office_source' => $this->file->office_source,
             'classification' => 'Standard',
             'date_released' => $this->file->date_released?->format('M d, Y'),
         ];
