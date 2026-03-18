@@ -1,10 +1,51 @@
 <div class="main" style="padding: 20px;">
-    <div class="content-container" style="display: flex" >
+    <style>
+        .content-container {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .document-information-container{
+            background-color: #ebebeb;
+            padding: 20px; 
+            border-radius: 5px; 
+            height: fit-content;
+        }
+
+        #qr-barcode-container {
+                visibility: visible !important;
+                position: absolute !important;
+                width: fit-content !important;
+                height: 50px !important;
+                top: 50% !important;
+                left: 50% !important;
+                scale: 0.5;
+        }
+
+        @media (max-width: 1100px) {
+            .content-container {
+                flex-direction: column;
+                gap: 70px;
+            }
+
+            #left-side-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                position: static !important; 
+            }
+
+            #main-content {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+
+    <div class="content-container">
         <!-- Left Sidebar Panel -->
-        <div id="left-side-panel" class="col-12 col-lg-3" style=" fit-content; align-self: flex-start;">
+        <div id="left-side-panel" class="col-12 col-lg-3" style="fit-content; align-self: flex-start;">
             <!-- Document Information -->
-            <div class="document-information-container mb-5" 
-                style="background-color: #ebebeb; padding: 20px; border-radius: 5px; height: fit-content;">
+            <div class="document-information-container mb-5">
                 <div class="mb-2">
                     <label class="m-0 font-weight-bold">Document Title:</label>
                     <p class="m-0" style="word-break: break-word;">
@@ -51,17 +92,21 @@
                 </select>
             </div>
 
-            <button id="print-btn" class="btn btn-primary btn-block mt-3">
+            <button wire:click="generateQrBarcode" 
+                id="generate-qr-barcode-btn"
+                class="btn btn-success btn-block mt-2">
+                <i class="fas fa-qrcode mr-2"></i> Generate QR & Barcode
+            </button>
+
+            <button id="print-btn" class="btn btn-primary btn-block mt-2">
                 <i class="fas fa-print mr-2"></i> Print
             </button>
         </div>
 
         <!-- Main Content Area -->
         <div id="main-content" class="col-12 col-lg-9">
-            <div style="background-color: #f9f9f9; padding: 40px; border-radius: 5px; min-height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                
                 <!-- Content Display Area -->
-                <div style="margin-bottom: 60px; width:100%;">
+                <div style="margin-bottom: 60px; width:100%;" >
                     @if($file)
                         @php
                             $path = 'uploads/'.$file->file_name;
@@ -89,13 +134,44 @@
                             $pdfUrl = url('storage/' . $path);
                         @endphp
 
-                        {{-- PDF Container --}}
+                        
                         <div id="pdf-paper" style="background:white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); transition: all 0.3s ease;">
-                            <canvas id="pdf-canvas" style="display:block; width:100%; height:100%;"></canvas>
+                            {{-- PDF Container --}}
+                            <canvas wire:ignore id="pdf-canvas" style="display:block; width:100%; height:100%;"></canvas>
+
+                            {{-- QR & Barcode Container --}}
+                            <div id="qr-barcode-container" class="mt-3">
+                                @if($qr_base64 || $barcode_html)
+                                    <div style="display:flex; padding: 15px; border-radius: 5px; border: 1px solid #ddd; text-align: center;">
+
+                                        {{-- Barcode --}}
+                                        @if($barcode_html)
+                                            <div>
+                                                <div style="display: inline-block; overflow-x: auto; max-width: 100%;">
+                                                    {!! $barcode_html !!}
+                                                </div>
+                                                <p class="mt-1 small">
+                                                    {{ $barcode_code ?? $file->barcode_no ?? $file->doc_control_no }}
+                                                </p>
+                                            </div>
+                                        @endif
+
+                                        {{-- QR Code --}}
+                                        @if($qr_base64)
+                                            <div class="mb-3">
+                                                <img src="data:image/png;base64,{{ $qr_base64 }}" 
+                                                    alt="QR Code"
+                                                    style="width: 150px; height: 150px; object-fit: contain;">
+                                            </div>
+                                        @endif
+                                        
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                         {{-- Pagination --}}
-                        <div class="d-flex justify-content-center align-items-center mt-2" style="gap:8px;">
+                        <div class="d-flex justify-content-center align-items-center mt-3" style="gap:8px;">
                             <button id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>&#8592; Prev</button>
                             <span id="pdf-page-info" class="small text-muted">
                                 Page <span id="pdf-page-num">1</span> of <span id="pdf-page-count">–</span>
@@ -111,7 +187,12 @@
                                     padding: 0;
                                 }
 
-                                body * { visibility: hidden; }
+                                body * {
+                                    visibility: hidden;
+                                    /* ← Force browser to print background colors */
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                }
 
                                 #pdf-paper, #pdf-paper * { 
                                     visibility: visible; 
@@ -130,9 +211,18 @@
 
                                 #pdf-canvas {
                                     width: 100% !important;
-                                    height: auto !important;
+                                    height: 100% !important;
                                     margin: 0 !important;
                                     padding: 0 !important;
+                                }
+                                #qr-barcode-container {
+                                    visibility: visible !important;
+                                    position: absolute !important;
+                                    width: fit-content !important;
+                                    height: 50px !important;
+                                    top: 50% !important;
+                                    left: 50% !important;
+                                    scale: 0.5
                                 }
                             }
                         </style>
@@ -141,8 +231,6 @@
                         (function () {
                             const PDF_URL = @json($pdfUrl);
 
-                            // Paper sizes in mm → converted to px at 96dpi
-                            // 1mm = 3.7795275591px
                             const PAPER_SIZES = {
                                 'A4':    { width: 794,  height: 1123 }, // 210mm x 297mm
                                 'Short': { width: 816,  height: 1056 }, // 215.9mm x 279.4mm (Letter)
@@ -157,13 +245,14 @@
                             const prevBtn     = document.getElementById('pdf-prev');
                             const nextBtn     = document.getElementById('pdf-next');
                             const paperSelect = document.getElementById('paperSize');
+                            const printButton = document.querySelector('#print-btn');
 
                             let pdfDoc      = null;
                             let currentPage = 1;
                             let renderTask  = null;
                             let currentSize = paperSelect ? paperSelect.value : 'A4';
 
-                            // Apply paper size to the wrapper div
+                            // ====== APPLY PAPER SIZE ====== //
                            function applyPaperSize(size) {
                                 const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
                                 paper.style.width  = dim.width  + 'px';
@@ -178,7 +267,13 @@
                                             margin: 0;
                                             padding: 0;
                                         }
-                                        body * { visibility: hidden; }
+                                        body * {
+                                            visibility: hidden;
+                                            /* ← Force browser to print background colors */
+                                            -webkit-print-color-adjust: exact !important;
+                                            print-color-adjust: exact !important;
+                                        }
+                                    
                                         #pdf-paper, #pdf-paper * { visibility: visible; }
                                         #pdf-paper {
                                             position: fixed;
@@ -191,14 +286,25 @@
                                         }
                                         #pdf-canvas {
                                             width: 100% !important;
-                                            height: auto !important;
+                                            height: 100% !important;
                                             margin: 0 !important;
                                             padding: 0 !important;
+                                        }
+                                        #qr-barcode-container {
+                                            visibility: visible !important;
+                                            position: absolute !important;
+                                            width: fit-content !important;
+                                            height: 50px !important;
+                                            top: 50% !important;
+                                            left: 50% !important;
+                                            scale: 0.5
                                         }
                                     }
                                 `;
                             }
-
+                            
+                            
+                            // ====== RENDER PAGE ====== //
                             function renderPage(num) {
                                 if (!pdfDoc) return;
                                 pdfDoc.getPage(num).then(function (page) {
@@ -220,7 +326,7 @@
                                     canvas.width     = viewport.width;
                                     canvas.height    = viewport.height;
 
-                                    // ✅ No longer overriding paper height here — applyPaperSize() controls it
+                                    //  No longer overriding paper height here — applyPaperSize() controls it
                                     if (renderTask) { renderTask.cancel(); }
 
                                     renderTask = page.render({ canvasContext: ctx, viewport });
@@ -237,6 +343,7 @@
                                 });
                             }
 
+                            // ====== INIT PDF ====== //
                             function initPdf() {
                                 if (typeof window.pdfjsLib === 'undefined') {
                                     setTimeout(initPdf, 100);
@@ -256,13 +363,6 @@
                                     });
                             }
 
-                            const printButton = document.querySelector('#print-btn');
-                            if (printButton) {
-                                printButton.addEventListener('click', () => {
-                                    window.print();
-                                });
-                            }
-
                             // Listen for paper size change
                             if (paperSelect) {
                                 paperSelect.addEventListener('change', function(){
@@ -278,6 +378,11 @@
 
                             nextBtn.addEventListener('click', function (){
                                 if (pdfDoc && currentPage < pdfDoc.numPages) { renderPage(++currentPage); }
+                            });
+
+
+                            printButton.addEventListener('click', () => {
+                                window.print();
                             });
 
                             // Set initial paper size and load PDF
@@ -304,7 +409,7 @@
                         <p style="font-size: 36px; color: #555; font-weight: 300; margin: 0;">No file selected</p>
                     @endif
                 </div>
-            </div>
+
         </div>
     </div>
 
