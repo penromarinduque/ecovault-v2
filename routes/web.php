@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\User\UserIndex;
+use App\Livewire\Main\Validate;
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
 use Illuminate\Http\Request;
@@ -42,9 +43,7 @@ Route::get('preview/{id}', function ($id) {
     return Storage::response('/uploads/'.$file->file_name, $file->name);
 })->name('preview');
 
-Route::get('validate-qr/{id}', function () {
-    return "QR validations goes here";
-})->name('validate-qr');
+Route::get('validate/{id}', Validate::class)->name('validate-qr');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

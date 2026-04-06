@@ -157,7 +157,7 @@
                                 <td>
                                     <div class="d-flex align-items-center" wire:ignore.self>
                                         <div class="btn-group" role="group" >
-                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => $file->barcode_no]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
+                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
                                                 <i class="fa-solid fa-qrcode"></i>
                                             </a>
                                             <a type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip" href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}" target="_blank">
@@ -190,7 +190,7 @@
                                             <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
-                                        @endcan
+                                        @endcan 
                                     </div>
                                 </td>
                             </tr>
