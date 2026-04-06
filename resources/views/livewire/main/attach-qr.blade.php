@@ -173,7 +173,7 @@
                 color: black;
                 text-align: left;
                 margin: 0;
-                font-family: 'Tahoma', Arial, sans-serif;
+                font-family: 'Tahoma', Arial, sans-ser~if;
                 font-size: 19px;
                 line-height: 1.2em;
                 font-weight: 600
