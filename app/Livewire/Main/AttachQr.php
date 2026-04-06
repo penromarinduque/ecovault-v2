@@ -3,7 +3,8 @@
 namespace App\Livewire\Main;
 
 use App\Models\File;
-use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\Writer\PngWriter;
 use Milon\Barcode\DNS1D;
 use Illuminate\Support\Facades\Storage;
@@ -13,11 +14,11 @@ class AttachQr extends Component
 {
     public $main_file_id;
     public $file;
-    public $paper_size = 'A4';
+    public $paper_size   = 'A4';
     public $document_meta = [];
     public $qr_base64    = null;
     public $barcode_html = null;
-    public $barcode_code = null; // ← add this
+    public $barcode_code = null;
 
     public function mount($main_file_id)
     {
@@ -42,25 +43,28 @@ class AttachQr extends Component
     {
         if (!$this->file) return;
 
-        $currentYear = now()->year;
-        $controlNo   = $this->file->doc_control_no ?? $this->file->id;
-        $fileName    = $this->file->name;
-
-        // QR Code — includes file name
-        $qrCode_string = "DENR-{$currentYear}-{$controlNo}-{$fileName}";
-
-        // Barcode — no file name
+        $currentYear        = now()->year;
+        $controlNo          = $this->file->doc_control_no ?? $this->file->id;
+        $fileName           = $this->file->name;
+        $qrCode_string      = "DENR-{$currentYear}-{$controlNo}-{$fileName}";
         $this->barcode_code = "DENR-{$currentYear}-{$controlNo}";
 
-        // Generate QR Code
-        $qrCode = new QrCode($qrCode_string);
-        $writer = new PngWriter();
-        $result = $writer->write($qrCode);
+        // Generate QR Code with DENR logo — v6 correct syntax
+        $builder = new Builder(
+            writer: new PngWriter(),
+            data: $qrCode_string,
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            logoPath: public_path('LOGO.png'),
+            logoResizeToWidth: 120,
+            logoPunchoutBackground: true,
+        );
+
+        $result = $builder->build();
         $this->qr_base64 = base64_encode($result->getString());
 
         // Generate Barcode
         $dns = new DNS1D();
-        $this->barcode_html = $dns->getBarcodeHTML($this->barcode_code, 'C128');
+        $this->barcode_html = $dns->getBarcodeHTML($this->barcode_code, 'C128', '2', 70);
     }
 
     public function render()
