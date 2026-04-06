@@ -21,10 +21,8 @@
             </div>
         </div>
 
-
         <script src="https://kit.fontawesome.com/48b9baa16e.js" crossorigin="anonymous"></script>
         @include('partials.scripts')
-        
         
     </body>
 </html>

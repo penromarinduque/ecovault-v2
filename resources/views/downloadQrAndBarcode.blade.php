@@ -28,7 +28,7 @@
         const qrCode = new Image(96, 96);
         const barcode = new Image(192, 64);
         const imageText = new Image(192, 55);
-        qrCode.src = 'https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => $file->barcode_no]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}';
+        qrCode.src = 'https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}';
         barcode.src = 'https://barcodeapi.org/api/128/{{ $file->barcode_no }}';
         imageText.src = '{{ asset("assets/images/barcode-text.png") }}';
         qrCode.onload = function() {
