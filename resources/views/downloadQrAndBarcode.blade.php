@@ -49,6 +49,7 @@
         );
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     </script>
     {{-- @endscript --}}
 </body>
