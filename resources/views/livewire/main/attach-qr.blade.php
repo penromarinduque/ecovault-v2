@@ -331,6 +331,17 @@
                 print-color-adjust: exact !important;
             }
 
+            /* QR-only print mode: show only the QR/barcode container and paper background */
+            body.print-qr-only #pdf-paper,
+            body.print-qr-only #qr-barcode-container,
+            body.print-qr-only #qr-barcode-container * {
+                visibility: visible !important;
+            }
+
+            body.print-qr-only #pdf-canvas {
+                display: none !important;
+            }
+
             /* Ensure PDF paper and all children are visible during print */
             #pdf-paper,
             #pdf-paper * {
@@ -421,13 +432,18 @@
             <!-- Generate QR & Barcode button (Livewire action) -->
             <button wire:click="generateQrBarcode" 
                 id="generate-qr-barcode-btn"
-                class="btn btn-success btn-block mt-2">
+                class="btn btn-success btn-block mt-2 text-left">
                 <i class="fas fa-qrcode mr-2"></i> Generate QR & Barcode
             </button>
 
-            <!-- Print button -->
-            <button id="print-btn" class="btn btn-primary btn-block mt-2">
+            <!-- Print Page button -->
+            <button id="print-page-btn" class="btn btn-primary btn-block mt-2 text-left">
                 <i class="fas fa-print mr-2"></i> Print
+            </button>
+
+            <!-- Print QR and Barcode button -->
+            <button id="print-qr-barcode-btn" class="btn btn-primary btn-block mt-2 text-left">
+                <i class="fas fa-print mr-2"></i> Print QR and Barcode
             </button>
         </div>
 
@@ -552,7 +568,8 @@
                             const prevBtn            = document.getElementById('pdf-prev');
                             const nextBtn            = document.getElementById('pdf-next');
                             const paperSelect        = document.getElementById('paperSize');
-                            const printButton        = document.getElementById('print-btn');
+                            const printButton        = document.getElementById('print-page-btn');
+                            const printQrButton      = document.getElementById('print-qr-barcode-btn');
                             const qrBarcodeContainer = document.getElementById('qr-barcode-container');
                             const qrResizeHandle     = document.querySelector('.qr-barcode-resize-handle');
 
@@ -799,14 +816,24 @@
                              */
                             printButton.addEventListener('click', function () {
                                 syncQrBarcodePositionForPrint();
+                                document.body.classList.remove('print-qr-only');
                                 window.print();
                             });
+
+                            if (printQrButton) {
+                                printQrButton.addEventListener('click', function () {
+                                    syncQrBarcodePositionForPrint();
+                                    document.body.classList.add('print-qr-only');
+                                    window.print();
+                                });
+                            }
 
                             window.addEventListener('beforeprint', syncQrBarcodePositionForPrint);
                             window.addEventListener('afterprint', function () {
                                 if (!qrBarcodeContainer) return;
                                 qrBarcodeContainer.style.removeProperty('--print-left');
                                 qrBarcodeContainer.style.removeProperty('--print-top');
+                                document.body.classList.remove('print-qr-only');
                             });
 
                             // Initialize PDF viewer
