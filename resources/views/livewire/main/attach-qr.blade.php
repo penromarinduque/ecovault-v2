@@ -1,49 +1,105 @@
 <div class="main" style="padding: 20px;">
     <!-- Global Styles -->
     <style>
+        :root {
+            --paper-width: 794px;
+            --paper-height: 1123px;
+            --paper-width-number: 794;
+            --paper-height-number: 1123;
+        }
+
         .content-container {
             display: flex;
             flex-direction: row;
+            gap: 20px;
         }
 
-        .document-information-container{
+        .document-information-container {
             background-color: #ebebeb;
             padding: 20px; 
             border-radius: 5px; 
             height: fit-content;
         }
 
+        .document-information-container div {
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+
+        .document-information-container label {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .document-information-container p {
+            margin: 4px 0 0 0;
+        }
+
+        /* ====== PAPER & PDF CONTAINER ====== */
+        #pdf-paper {
+            position: relative;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            width: var(--paper-width);
+            height: var(--paper-height);
+            margin: 0 auto 20px;
+            overflow: hidden;
+            contain: layout style paint;
+        }
+
+        #pdf-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ====== QR & BARCODE CONTAINER ====== */
         #qr-barcode-container {
-            visibility: visible !important;
-            position: absolute !important;
-            width: fit-content !important;
-            height: fit-content !important;
+            position: absolute;
+            visibility: visible;
+            width: fit-content;
+            height: fit-content;
             cursor: grab;
             user-select: none;
             transform-origin: top left;
-            scale: 0.5
+            left: 20px;
+            top: 20px;
+            z-index: 10;
+            scale: 0.6
         }
 
-        .bar-code-logo-container{
+        #qr-barcode-container:active {
+            cursor: grabbing;
+        }
+
+        .qr-barcode-container__flex {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-code-logo-container {
             display: flex;
             gap: 8px;
-            flex-direction: column
+            flex-direction: column;
         }
 
-        #qr-barcode-container.focused {
-            cursor: grab;
-        }
-
-        .denr-logo{
+        .denr-logo {
             display: flex;
             gap: 10px;
             align-items: center;
         }
 
-        .denr-logo__img{
+        .denr-logo__img {
             --size: 70px;
             height: var(--size);
             width: var(--size);
+            flex-shrink: 0;
         }
 
         .denr-logo__txt {
@@ -51,188 +107,208 @@
             text-align: left;
             margin: 0;
             font-family: 'Tahoma', Arial, sans-serif;
-            font-size: 19px;
+            font-size: 14px;
             line-height: 1.2em;
             font-weight: 600;
             white-space: nowrap;
         }
-        .denr-logo__txt span{
+
+        .denr-logo__txt span {
             font-weight: 900;
-            font-size: 16px;
+            font-size: 12px;
         }
 
-        .qr-barcode-container__flex{
-            position: relative;
-            display:flex; 
-            gap: 10px; 
-            border-radius: 5px; 
-            align-items: flex-end;
-        }
-
-        .barcode{
+        .barcode {
             display: inline-block;
-            overflow-x: auto; 
+            overflow-x: auto;
             max-width: 100%;
         }
 
-        .barcode-txt{
+        .barcode-txt {
             color: black;
-            font-size: 25px;
+            font-size: 12px;
             font-weight: 600;
             text-align: center;
-            margin: 0;
+            margin: 4px 0 0 0;
+            word-break: break-word;
         }
 
-        .qr-code{
-            width: 150px;
-            height: 150px; 
+        .qr-code {
+            width: 120px;
+            height: 120px;
             object-fit: contain;
+            flex-shrink: 0;
         }
 
+        /* ====== PAGE CONTROLS ====== */
+        .pdf-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        /* ====== SIDEBAR ====== */
+        #left-side-panel {
+            flex: 0 0 300px;
+            align-self: flex-start;
+        }
+
+        #main-content {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        /* ====== RESPONSIVE ====== */
         @media (max-width: 1100px) {
             .content-container {
                 flex-direction: column;
-                gap: 70px;
+                gap: 40px;
             }
 
             #left-side-panel {
-                width: 100% !important;
-                max-width: 100% !important;
-                position: static !important; 
+                flex: 1 1 auto;
             }
 
-            #main-content {
-                width: 100% !important;
-                max-width: 100% !important;
+            #pdf-paper {
+                width: 100%;
+                max-width: 100%;
             }
         }
-    </style>
 
-    <!--  Print Styles -->
-
-    <style id="print-styles">
+        /* ====== PRINT STYLES ====== */
         @media print {
             @page {
-                margin: 0; 
+                size: A4;
+                margin: 0;
                 padding: 0;
             }
 
-            body * {
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            * {
                 visibility: hidden;
-                /* ← Force browser to print background colors */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            #pdf-paper, #pdf-paper * { 
-                visibility: visible; 
+            #pdf-paper,
+            #pdf-paper * {
+                visibility: visible;
             }
 
             #pdf-paper {
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 100% !important;
-                height: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                box-shadow: none !important;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
             }
 
             #pdf-canvas {
-                width: 100% !important;
-                height: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                width: 100%;
+                height: 100%;
             }
+
             #qr-barcode-container {
-                visibility: visible !important;
-                position: absolute !important;
-                width: fit-content !important;
-                height: 50px !important;
-                top: 50% !important;
-                left: 50% !important;
-                scale: 0.5
-            }
-            .denr-logo{
+                scale: 0.6;
+                visibility: visible;
                 position: absolute;
-                bottom: 30px;
-                left: 0;
+            }
+
+            .qr-barcode-container__flex {
+                background: transparent;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .denr-logo {
                 display: flex;
                 gap: 10px;
                 align-items: center;
             }
 
-            .denr-logo__img{
-                --size: 70px;
-                height: var(--size);
-                width: var(--size);
+            .denr-logo__img {
+                height: 70px;
+                width: 70px;
             }
 
             .denr-logo__txt {
                 color: black;
                 text-align: left;
                 margin: 0;
-                font-family: 'Tahoma', Arial, sans-ser~if;
-                font-size: 19px;
-                line-height: 1.2em;
-                font-weight: 600
-            }
-            .denr-logo__txt span{
-                font-weight: 900;
+                font-family: 'Tahoma', Arial, sans-serif;
                 font-size: 16px;
+                line-height: 1.2em;
+                font-weight: 600;
+                white-space: normal;
             }
 
+            .denr-logo__txt span {
+                font-weight: 900;
+                font-size: 14px;
+            }
+
+            .qr-code {
+                width: 150px;
+                height: 150px;
+            }
+
+            .barcode-txt {
+                font-size: 14px;
+            }
         }
     </style>
 
     <div class="content-container">
         <!-- Left Sidebar Panel -->
-        <div id="left-side-panel" class="col-12 col-lg-3" style="fit-content; align-self: flex-start;">
+        <div id="left-side-panel" class="col-12 col-lg-3">
             <button onclick="history.back()" class="btn btn-secondary mb-3">
                 &larr; Back
             </button>
+            
             <!-- Document Information -->
             <div class="document-information-container mb-5">
-                <div class="mb-2">
-                    <label class="m-0 font-weight-bold">Document Title:</label>
-                    <p class="m-0" style="word-break: break-word;">
-                        {{ $document_meta['title'] ?? 'N/A' }}
-                    </p>
-                </div>
-                
-                <div class="mb-2">
-                    <label class="m-0 font-weight-bold">Office Source:</label>
-                    <p class="m-0" style="word-break: break-word;">
-                        {{ $document_meta['office_source'] ?? 'N/A' }}
-                    </p>
-                </div>
-                
-                <div class="mb-2">
-                    <label class="m-0 font-weight-bold">Control Number:</label>
-                    <p class="m-0" style="word-break: break-word;">
-                        {{ $document_meta['control_no'] ?? 'N/A' }}
-                    </p>
-                </div>
-                
-                <div class="mb-2">
-                    <label class="m-0 font-weight-bold">Classification:</label>
-                    <p class="m-0" style="word-break: break-word;">
-                        {{ $document_meta['classification'] ?? 'N/A' }}
-                    </p>
+                <div>
+                    <label>Document Title:</label>
+                    <p>{{ $document_meta['title'] ?? 'N/A' }}</p>
                 </div>
                 
                 <div>
-                    <label class="m-0 font-weight-bold">Date Released:</label>
-                    <p class="m-0 flex-grow-1 text-wrap">
-                        {{ $document_meta['date_released'] ?? 'N/A' }}
-                    </p>
+                    <label>Office Source:</label>
+                    <p>{{ $document_meta['office_source'] ?? 'N/A' }}</p>
+                </div>
+                
+                <div>
+                    <label>Control Number:</label>
+                    <p>{{ $document_meta['control_no'] ?? 'N/A' }}</p>
+                </div>
+                
+                <div>
+                    <label>Classification:</label>
+                    <p>{{ $document_meta['classification'] ?? 'N/A' }}</p>
+                </div>
+                
+                <div>
+                    <label>Date Released:</label>
+                    <p>{{ $document_meta['date_released'] ?? 'N/A' }}</p>
                 </div>
             </div>
 
             <!-- Paper Size and Print Options -->
             <div class="mb-3">
-                <label for="paperSize" class="small font-weight-bold">Select Paper Size</label>
+                <label for="paperSize" class="small font-weight-bold d-block mb-2">Select Paper Size</label>
                 <select wire:model="paper_size" id="paperSize" class="form-control form-control-sm">
                     <option value="A4">A4</option>
                     <option value="Short">Short</option>
@@ -253,346 +329,280 @@
 
         <!-- Main Content Area -->
         <div id="main-content" class="col-12 col-lg-9">
-            <div style="margin-bottom: 60px; width:100%;">
-                @if($file)
+            @if($file)
+                @php
+                    $path = 'uploads/'.$file->file_name;
+                    $url = Storage::disk('public')->url($path);
+                    $mime = Storage::disk('public')->mimeType($path) ?: 'application/octet-stream';
+                @endphp
+
+                @if(str_starts_with($mime, 'image/'))
                     @php
-                        $path = 'uploads/'.$file->file_name;
-                        $url = Storage::disk('public')->url($path);
-                        $mime = Storage::disk('public')->mimeType($path) ?: 'application/octet-stream';
+                        try {
+                            $imageData = Storage::disk('public')->get($path);
+                            $base64 = 'data:' . $mime . ';base64,' . base64_encode($imageData);
+                        } catch (\Exception $e) {
+                            $base64 = '';
+                        }
                     @endphp
-                    @if(str_starts_with($mime, 'image/'))
-                        @php
-                            try {
-                                $imageData = Storage::disk('public')->get($path);
-                                $base64 = 'data:' . $mime . ';base64,' . base64_encode($imageData);
-                            } catch (\Exception $e) {
-                                $base64 = '';
-                            }
-                        @endphp
-                        @if($base64)
-                            <img src="{{ $base64 }}" alt="File Preview" style="max-width: 100%; max-height: 400px; object-fit: contain;">
-                        @else
-                            <p class="text-muted">Error loading image.</p>
-                        @endif
+                    @if($base64)
+                        <img src="{{ $base64 }}" alt="File Preview" style="max-width: 100%; max-height: 400px; object-fit: contain;">
+                    @else
+                        <p class="text-muted">Error loading image.</p>
+                    @endif
 
-                    @elseif($mime === 'application/pdf')
-                        @php
-                            $path = 'uploads/' . $file->file_name;
-                            $pdfUrl = url('storage/' . $path);
-                        @endphp
-                        <div id="pdf-paper" style="position: relative; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.4); transition: all 0.3s ease;">
-                            {{-- PDF Canvas --}}
-                            <canvas wire:ignore id="pdf-canvas" style="display:block; width:100%; height:100%;"></canvas>
+                @elseif($mime === 'application/pdf')
+                    @php
+                        $pdfUrl = url('storage/' . $path);
+                    @endphp
+                    
+                    <div id="pdf-paper">
+                        {{-- PDF Canvas --}}
+                        <canvas wire:ignore id="pdf-canvas"></canvas>
 
-                            {{-- QR & Barcode Container --}}
-                            <div id="qr-barcode-container" class="mt-3">
-                                @if($qr_base64 || $barcode_html)
-                                    <div class="qr-barcode-container__flex">
-                                        <div class="bar-code-logo-container">
-                                            <div class="denr-logo">
-                                                <img class="denr-logo__img" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
-                                                <p class="denr-logo__txt">
-                                                    Department of Environment <br>
-                                                    and Natural Resources <br>
-                                                    <span>PENRO - Marinduque</span>
-                                                </p>
-                                            </div>
-
-                                            @if($barcode_html)
-                                                <div>
-                                                    <div class="barcode">{!! $barcode_html !!}</div>
-                                                    <p class="barcode-txt">
-                                                        {{ $barcode_code ?? $file->barcode_no ?? $file->doc_control_no }}
-                                                    </p>
-                                                </div>
-                                            @endif
+                        {{-- QR & Barcode Container --}}
+                        <div id="qr-barcode-container">
+                            @if($qr_base64 || $barcode_html)
+                                <div class="qr-barcode-container__flex">
+                                    <div class="bar-code-logo-container">
+                                        <div class="denr-logo">
+                                            <img class="denr-logo__img" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
+                                            <p class="denr-logo__txt">
+                                                Department of Environment <br>
+                                                and Natural Resources <br>
+                                                <span>PENRO - Marinduque</span>
+                                            </p>
                                         </div>
 
-                                        {{-- QR Code --}}
-                                        @if($qr_base64)
-                                            <img class="qr-code" src="data:image/png;base64,{{ $qr_base64 }}" alt="QR Code" />
+                                        @if($barcode_html)
+                                            <div>
+                                                <div class="barcode">{!! $barcode_html !!}</div>
+                                                <p class="barcode-txt">
+                                                    {{ $barcode_code ?? $file->barcode_no ?? $file->doc_control_no }}
+                                                </p>
+                                            </div>
                                         @endif
                                     </div>
-                                @endif
-                            </div>
+
+                                    {{-- QR Code --}}
+                                    @if($qr_base64)
+                                        <img class="qr-code" src="data:image/png;base64,{{ $qr_base64 }}" alt="QR Code" />
+                                    @endif
+                                </div>
+                            @endif
                         </div>
+                    </div>
 
-                        {{-- Page Control Buttons --}}
-                        <div class="d-flex justify-content-center align-items-center mt-3" style="gap:8px;">
-                            <button id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>&#8592; Prev</button>
-                            <span id="pdf-page-info" class="small text-muted">
-                                Page <span id="pdf-page-num">1</span> of <span id="pdf-page-count">–</span>
-                            </span>
-                            <button id="pdf-next" class="btn btn-sm btn-outline-secondary">Next &#8594;</button>
-                        </div>
+                    {{-- Page Control Buttons --}}
+                    <div class="pdf-controls">
+                        <button id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>&#8592; Prev</button>
+                        <span id="pdf-page-info" class="small text-muted">
+                            Page <span id="pdf-page-num">1</span> of <span id="pdf-page-count">–</span>
+                        </span>
+                        <button id="pdf-next" class="btn btn-sm btn-outline-secondary">Next &#8594;</button>
+                    </div>
 
-                        <script>
-                            (function () {
-                                const PDF_URL = @json($pdfUrl);
+                    <script>
+                        (function () {
+                            const PDF_URL = @json($pdfUrl);
+                            const root = document.documentElement;
 
-                                const PAPER_SIZES = {
-                                    'A4':    { width: 794,  height: 1123 },
-                                    'Short': { width: 816,  height: 1056 },
-                                    'Long':  { width: 816,  height: 1344 },
-                                };
+                            const PAPER_SIZES = {
+                                'A4':    { width: 794,  height: 1123 },
+                                'Short': { width: 816,  height: 1056 },
+                                'Long':  { width: 816,  height: 1344 },
+                            };
 
-                                const canvas             = document.getElementById('pdf-canvas');
-                                const ctx                = canvas.getContext('2d');
-                                const paper              = document.getElementById('pdf-paper');
-                                const pageNumEl          = document.getElementById('pdf-page-num');
-                                const pageCountEl        = document.getElementById('pdf-page-count');
-                                const prevBtn            = document.getElementById('pdf-prev');
-                                const nextBtn            = document.getElementById('pdf-next');
-                                const paperSelect        = document.getElementById('paperSize');
-                                const printButton        = document.getElementById('print-btn');
-                                const qrBarcodeContainer = document.getElementById('qr-barcode-container');
+                            // DOM elements
+                            const canvas             = document.getElementById('pdf-canvas');
+                            const ctx                = canvas.getContext('2d');
+                            const paper              = document.getElementById('pdf-paper');
+                            const pageNumEl          = document.getElementById('pdf-page-num');
+                            const pageCountEl        = document.getElementById('pdf-page-count');
+                            const prevBtn            = document.getElementById('pdf-prev');
+                            const nextBtn            = document.getElementById('pdf-next');
+                            const paperSelect        = document.getElementById('paperSize');
+                            const printButton        = document.getElementById('print-btn');
+                            const qrBarcodeContainer = document.getElementById('qr-barcode-container');
 
-                                let pdfDoc      = null;
-                                let currentPage = 1;
-                                let renderTask  = null;
-                                let currentSize = paperSelect ? paperSelect.value : 'A4';
+                            // State
+                            let pdfDoc      = null;
+                            let currentPage = 1;
+                            let renderTask  = null;
+                            let currentSize = paperSelect ? paperSelect.value : 'A4';
 
-                                // ====== APPLY PAPER SIZE ====== //
-                                function applyPaperSize(size) {
-                                    const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
-                                    paper.style.width  = dim.width  + 'px';
-                                    paper.style.height = dim.height + 'px';
+                            // ====== APPLY PAPER SIZE ====== //
+                            function applyPaperSize(size) {
+                                const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
+                                
+                                // Use CSS custom properties instead of direct style manipulation
+                                root.style.setProperty('--paper-width', dim.width + 'px');
+                                root.style.setProperty('--paper-height', dim.height + 'px');
+                                root.style.setProperty('--paper-width-number', dim.width);
+                                root.style.setProperty('--paper-height-number', dim.height);
 
-                                    const pageSizeMap = { 'A4': 'A4', 'Short': 'letter', 'Long': 'legal' };
-                                    const printStyle  = document.getElementById('print-styles');
-                                    printStyle.innerHTML = `
-                                        @media print {
-                                            @page {
-                                                size: ${pageSizeMap[size]};
-                                                margin: 0;
-                                                padding: 0;
-                                            }
-                                            html, body {
-                                                width: 100vw !important;
-                                                height: 100vw !important;
-                                                margin: 0 !important;
-                                                padding: 0 !important;
-                                                overflow: hidden !important;
-                                            }
-                                            body * {
-                                                visibility: hidden;
-                                                -webkit-print-color-adjust: exact !important;
-                                                print-color-adjust: exact !important;
-                                            }
-                                            #pdf-paper, #pdf-paper * { visibility: visible; }
-                                            #pdf-paper {
-                                                position: fixed;
-                                                top: 0;
-                                                bottom: 0; 
-                                                left: 0;
-                                                right: 0;
-                                                width: 100% !important;
-                                                height: 100% !important;
-                                                margin: 0 !important;
-                                                padding: 0 !important;
-                                                box-shadow: none !important;
-                                            }
-                                            #pdf-canvas {
-                                                width: 100% !important;
-                                                height: 100% !important;
-                                                margin: 0 !important;
-                                                padding: 0 !important;
-                                            }
-                                            #qr-barcode-container {
-                                                visibility: visible !important;
-                                                position: absolute !important;
-                                                width: fit-content !important;
-                                                height: fit-content !important;
-                                                transform-origin: top left;
-                                                scale: 0.5;
-                                            }
-                                            .bar-code-logo-container {
-                                                display: flex;
-                                                gap: 8px;
-                                                flex-direction: column;
-                                            }
-                                            .denr-logo {
-                                                display: flex;
-                                                gap: 10px;
-                                                align-items: center;
-                                            }
-                                            .denr-logo__img {
-                                                --size: 70px;
-                                                height: var(--size);
-                                                width: var(--size);
-                                            }
-                                            .denr-logo__txt {
-                                                color: black;
-                                                text-align: left;
-                                                margin: 0;
-                                                font-family: 'Tahoma', Arial, sans-serif;
-                                                font-size: 19px;
-                                                line-height: 1.2em;
-                                                font-weight: 600;
-                                                white-space: nowrap;
-                                            }
-                                            .denr-logo__txt span {
-                                                font-weight: 900;
-                                                font-size: 16px;
-                                            }
-                                        }
-                                    `;
-                                }
+                                // Render the page with new dimensions
+                                renderPage(currentPage);
+                            }
 
-                                // ====== RENDER PAGE ====== //
-                                function renderPage(num) {
-                                    if (!pdfDoc) return;
-                                    pdfDoc.getPage(num).then(function (page) {
-                                        const dim     = PAPER_SIZES[currentSize] || PAPER_SIZES['A4'];
-                                        const paperW  = dim.width  - 16;
-                                        const paperH  = dim.height - 16;
-                                        const pageVp  = page.getViewport({ scale: 1 });
+                            // ====== RENDER PAGE ====== //
+                            function renderPage(num) {
+                                if (!pdfDoc) return;
 
-                                        let scale     = paperW / pageVp.width;
-                                        const scaledH = pageVp.height * scale;
+                                pdfDoc.getPage(num).then(function (page) {
+                                    const dim     = PAPER_SIZES[currentSize] || PAPER_SIZES['A4'];
+                                    const paperW  = dim.width  - 16;
+                                    const paperH  = dim.height - 16;
+                                    const pageVp  = page.getViewport({ scale: 1 });
 
-                                        if (scaledH > paperH) {
-                                            scale = paperH / pageVp.height;
-                                        }
+                                    let scale     = paperW / pageVp.width;
+                                    const scaledH = pageVp.height * scale;
 
-                                        const viewport = page.getViewport({ scale });
-                                        canvas.width   = viewport.width;
-                                        canvas.height  = viewport.height;
+                                    if (scaledH > paperH) {
+                                        scale = paperH / pageVp.height;
+                                    }
 
-                                        if (renderTask) { renderTask.cancel(); }
+                                    const viewport = page.getViewport({ scale });
+                                    canvas.width   = viewport.width;
+                                    canvas.height  = viewport.height;
 
-                                        renderTask = page.render({ canvasContext: ctx, viewport });
-                                        renderTask.promise.then(function () {
+                                    if (renderTask) {
+                                        renderTask.cancel();
+                                    }
+
+                                    renderTask = page.render({ canvasContext: ctx, viewport });
+                                    renderTask.promise
+                                        .then(function () {
                                             renderTask = null;
                                             pageNumEl.textContent = num;
                                             prevBtn.disabled = num <= 1;
                                             nextBtn.disabled = num >= pdfDoc.numPages;
-                                        }).catch(function (err) {
+                                        })
+                                        .catch(function (err) {
                                             if (err.name !== 'RenderingCancelledException') {
                                                 console.error('PDF render error:', err);
                                             }
                                         });
-                                    });
+                                });
+                            }
+
+                            // ====== INIT PDF ====== //
+                            function initPdf() {
+                                if (typeof window.pdfjsLib === 'undefined') {
+                                    setTimeout(initPdf, 100);
+                                    return;
                                 }
 
-                                // ====== INIT PDF ====== //
-                                function initPdf() {
-                                    if (typeof window.pdfjsLib === 'undefined') {
-                                        setTimeout(initPdf, 100);
-                                        return;
-                                    }
-
-                                    window.pdfjsLib.getDocument(PDF_URL).promise
-                                        .then(function (pdf) {
-                                            pdfDoc = pdf;
-                                            pageCountEl.textContent = pdf.numPages;
-                                            applyPaperSize(currentSize);
-                                            renderPage(currentPage);
-                                        })
-                                        .catch(function (err) {
-                                            document.getElementById('pdf-paper').innerHTML =
-                                                '<p class="text-danger small p-3">Failed to load PDF: ' + err.message + '</p>';
-                                        });
-                                }
-
-                                // ====== PAPER SIZE CHANGE ====== //
-                                if (paperSelect) {
-                                    paperSelect.addEventListener('change', function () {
-                                        currentSize = this.value;
+                                window.pdfjsLib.getDocument(PDF_URL).promise
+                                    .then(function (pdf) {
+                                        pdfDoc = pdf;
+                                        pageCountEl.textContent = pdf.numPages;
                                         applyPaperSize(currentSize);
                                         renderPage(currentPage);
+                                    })
+                                    .catch(function (err) {
+                                        paper.innerHTML =
+                                            '<p class="text-danger small p-3">Failed to load PDF: ' + err.message + '</p>';
                                     });
-                                }
-
-                                // ====== DRAGGABLE QR/BARCODE CONTAINER ====== //
-                                function dragableQrBarcodeContainer() {
-                                    if (!qrBarcodeContainer) return;
-
-                                    let isDragging = false;
-                                    let dragOffsetX = 0;
-                                    let dragOffsetY = 0;
-
-                                    // Safe initial position
-                                    qrBarcodeContainer.style.left = '20px';
-                                    qrBarcodeContainer.style.top  = '20px';
-
-                                    qrBarcodeContainer.addEventListener('mousedown', function (e) {
-                                        isDragging = true;
-                                        qrBarcodeContainer.style.cursor = 'grabbing';
-
-                                        // getBoundingClientRect accounts for CSS transforms/scale
-                                        const rect  = qrBarcodeContainer.getBoundingClientRect();
-                                        dragOffsetX = e.clientX - rect.left;
-                                        dragOffsetY = e.clientY - rect.top;
-
-                                        e.preventDefault();
-                                    });
-
-                                    document.addEventListener('mousemove', function (e) {
-                                        if (!isDragging) return;
-
-                                        const paperRect     = paper.getBoundingClientRect();
-                                        const containerRect = qrBarcodeContainer.getBoundingClientRect();
-
-                                        let newLeft = e.clientX - paperRect.left - dragOffsetX;
-                                        let newTop  = e.clientY - paperRect.top  - dragOffsetY;
-
-                                        // Clamp within pdf-paper bounds using visual (rendered) size
-                                        newLeft = Math.max(0, Math.min(newLeft, paperRect.width  - containerRect.width));
-                                        newTop  = Math.max(0, Math.min(newTop,  paperRect.height - containerRect.height));
-
-                                        qrBarcodeContainer.style.left = newLeft + 'px';
-                                        qrBarcodeContainer.style.top  = newTop  + 'px';
-                                    });
-
-                                    document.addEventListener('mouseup', function () {
-                                        if (isDragging) {
-                                            isDragging = false;
-                                            qrBarcodeContainer.style.cursor = 'grab';
-                                        }
-                                    });
-                                }
-
-                                dragableQrBarcodeContainer();
-
-                                // ====== PAGE NAVIGATION ====== //
-                                prevBtn.addEventListener('click', function () {
-                                    if (currentPage > 1) { renderPage(--currentPage); }
-                                });
-
-                                nextBtn.addEventListener('click', function () {
-                                    if (pdfDoc && currentPage < pdfDoc.numPages) { renderPage(++currentPage); }
-                                });
-
-                                // ====== PRINT ====== //
-                                printButton.addEventListener('click', function () {
-                                    window.print();
-                                });
-
-                                // Init
-                                applyPaperSize(currentSize);
-                                initPdf();
-                            })();
-                        </script>
-
-                    @elseif(str_starts_with($mime, 'text/'))
-                        @php
-                            try {
-                                $content = Storage::disk('public')->get($path);
-                            } catch (\Exception $e) {
-                                $content = 'Error loading file content.';
                             }
-                        @endphp
-                        <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">{{ $content }}</pre>
-                    @else
-                        <object data="{{ $url }}" type="{{ $mime }}" width="100%" height="400px">
-                            <p class="text-muted">Cannot display preview. <a href="{{ $url }}" target="_blank">Download the file</a></p>
-                        </object>
-                    @endif
+
+                            // ====== PAPER SIZE CHANGE ====== //
+                            if (paperSelect) {
+                                paperSelect.addEventListener('change', function () {
+                                    currentSize = this.value;
+                                    applyPaperSize(currentSize);
+                                });
+                            }
+
+                            // ====== DRAGGABLE QR/BARCODE CONTAINER ====== //
+                            function enableDraggableQrBarcode() {
+                                if (!qrBarcodeContainer) return;
+
+                                let isDragging = false;
+                                let dragOffsetX = 0;
+                                let dragOffsetY = 0;
+
+                                qrBarcodeContainer.addEventListener('mousedown', function (e) {
+                                    isDragging = true;
+                                    
+                                    const rect  = qrBarcodeContainer.getBoundingClientRect();
+                                    const paperRect = paper.getBoundingClientRect();
+                                    
+                                    dragOffsetX = e.clientX - rect.left;
+                                    dragOffsetY = e.clientY - rect.top;
+
+                                    e.preventDefault();
+                                });
+
+                                document.addEventListener('mousemove', function (e) {
+                                    if (!isDragging) return;
+
+                                    const paperRect     = paper.getBoundingClientRect();
+                                    const containerRect = qrBarcodeContainer.getBoundingClientRect();
+
+                                    let newLeft = e.clientX - paperRect.left - dragOffsetX;
+                                    let newTop  = e.clientY - paperRect.top  - dragOffsetY;
+
+                                    // Clamp to paper bounds
+                                    const maxLeft = paperRect.width  - containerRect.width;
+                                    const maxTop  = paperRect.height - containerRect.height;
+
+                                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                                    newTop  = Math.max(0, Math.min(newTop,  maxTop));
+
+                                    qrBarcodeContainer.style.left = newLeft + 'px';
+                                    qrBarcodeContainer.style.top  = newTop  + 'px';
+                                });
+
+                                document.addEventListener('mouseup', function () {
+                                    isDragging = false;
+                                });
+                            }
+
+                            enableDraggableQrBarcode();
+
+                            // ====== PAGE NAVIGATION ====== //
+                            prevBtn.addEventListener('click', function () {
+                                if (currentPage > 1) {
+                                    renderPage(--currentPage);
+                                }
+                            });
+
+                            nextBtn.addEventListener('click', function () {
+                                if (pdfDoc && currentPage < pdfDoc.numPages) {
+                                    renderPage(++currentPage);
+                                }
+                            });
+
+                            // ====== PRINT ====== //
+                            printButton.addEventListener('click', function () {
+                                window.print();
+                            });
+
+                            // Initialize
+                            applyPaperSize(currentSize);
+                            initPdf();
+                        })();
+                    </script>
+
+                @elseif(str_starts_with($mime, 'text/'))
+                    @php
+                        try {
+                            $content = Storage::disk('public')->get($path);
+                        } catch (\Exception $e) {
+                            $content = 'Error loading file content.';
+                        }
+                    @endphp
+                    <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">{{ $content }}</pre>
+
                 @else
-                    <p style="font-size: 36px; color: #555; font-weight: 300; margin: 0;">No file selected</p>
+                    <object data="{{ $url }}" type="{{ $mime }}" width="100%" height="400px">
+                        <p class="text-muted">Cannot display preview. <a href="{{ $url }}" target="_blank">Download the file</a></p>
+                    </object>
                 @endif
-            </div>
+            @else
+                <p style="font-size: 36px; color: #555; font-weight: 300; margin: 0;">No file selected</p>
+            @endif
         </div>
     </div>
 
