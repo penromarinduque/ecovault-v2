@@ -1,19 +1,48 @@
 <div class="main" style="padding: 20px;">
-    <!-- Global Styles -->
+    <!--
+    ============================================================
+    ATTACH QR CODE COMPONENT
+    ============================================================
+    Purpose: Display PDF file preview with draggable, resizable
+             QR code and barcode overlay for document verification
+    
+    Features:
+    - PDF viewer with page navigation
+    - Dynamic QR code generation from document metadata
+    - Draggable container within paper boundaries
+    - Resizable QR/barcode section with proportional scaling
+    - Paper size selection (A4, Short, Long)
+    - Print-optimized styling
+    - Document metadata display in sidebar
+    ============================================================
+    -->
+
+    <!-- ====== STYLES ====== -->
     <style>
+        /* ====== CSS CUSTOM PROPERTIES ====== */
         :root {
+            /* Paper dimensions (pixels) */
             --paper-width: 794px;
             --paper-height: 1123px;
             --paper-width-number: 794;
             --paper-height-number: 1123;
+            
+            /* QR/Barcode container base dimensions */
+            --qr-container-base-width: 350px;
+            --qr-container-base-height: 180px;
+            
+            /* Dynamic scaling factor (1 = 100%) */
+            --qr-scale: 1;
         }
 
+        /* ====== LAYOUT: MAIN CONTAINERS ====== */
         .content-container {
             display: flex;
             flex-direction: row;
             gap: 20px;
         }
 
+        /* ====== SIDEBAR: DOCUMENT INFORMATION ====== */
         .document-information-container {
             background-color: #ebebeb;
             padding: 20px; 
@@ -35,60 +64,117 @@
             margin: 4px 0 0 0;
         }
 
-        /* ====== PAPER & PDF CONTAINER ====== */
+        /* ========================================
+           SECTION: PAPER & PDF DISPLAY
+           Simulates a physical paper page
+           ======================================== */
         #pdf-paper {
             position: relative;
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
-            width: var(--paper-width);
-            height: var(--paper-height);
             margin: 0 auto 20px;
             overflow: hidden;
-            contain: layout style paint;
+            contain: layout style paint; /* Performance optimization */
+            width: 1060px;
         }
 
         #pdf-canvas {
             display: block;
-            width: 100%;
-            height: 100%;
+            width: 1060px;
+            height: 1650px;
         }
 
-        /* ====== QR & BARCODE CONTAINER ====== */
+        /* ========================================
+           SECTION: QR & BARCODE CONTAINER
+           Features:
+           - Draggable within paper bounds
+           - Resizable with proportional scaling
+           - Contains DENR logo, barcode, QR code
+           ======================================== */
         #qr-barcode-container {
             position: absolute;
             visibility: visible;
-            width: fit-content;
-            height: fit-content;
-            cursor: grab;
-            user-select: none;
-            transform-origin: top left;
             left: 20px;
             top: 20px;
             z-index: 10;
-            scale: 0.6
+            cursor: grab;
+            user-select: none;
+            overflow: hidden;
+            min-width: calc(var(--qr-container-base-width) * 0.1);
+            min-height: calc(var(--qr-container-base-height) * 0.1);
+            max-width: calc(var(--paper-width-number) * 0.7);
+            max-height: calc(var(--paper-height-number) * 0.45);
+            width: calc(var(--qr-container-base-width) * var(--qr-scale));
+            height: calc(var(--qr-container-base-height) * var(--qr-scale));
         }
 
         #qr-barcode-container:active {
             cursor: grabbing;
         }
 
+        /* Inner wrapper - handles scale transformation */
+        .qr-barcode-inner {
+            width: var(--qr-container-base-width);
+            height: var(--qr-container-base-height);
+            transform-origin: top left;
+            transform: scale(var(--qr-scale));
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: flex-start;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        /* Flex wrapper for layout: logo + barcode (vertical) and QR code (horizontal) */
         .qr-barcode-container__flex {
             display: flex;
             gap: 10px;
             align-items: flex-end;
             background: rgba(255, 255, 255, 0.95);
             padding: 8px;
+            padding-top: 0px; 
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            min-height: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
+        /* Container for DENR logo + barcode (vertical stack) */
         .bar-code-logo-container {
             display: flex;
             gap: 8px;
             flex-direction: column;
+            min-width: 0;
         }
 
+        /* ====== BARCODE STYLING ====== */
+        .barcode {
+            display: block;
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+        }
+
+        .barcode img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .barcode-txt {
+            color: black;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin: 4px 0 0 0;
+            word-break: break-word;
+        }
+
+        /* ====== DENR LOGO & TEXT ====== */
         .denr-logo {
             display: flex;
             gap: 10px;
@@ -102,6 +188,7 @@
             flex-shrink: 0;
         }
 
+        /* Organization name and details text */
         .denr-logo__txt {
             color: black;
             text-align: left;
@@ -118,29 +205,67 @@
             font-size: 12px;
         }
 
-        .barcode {
-            display: inline-block;
-            overflow-x: auto;
-            max-width: 100%;
-        }
-
-        .barcode-txt {
-            color: black;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin: 4px 0 0 0;
-            word-break: break-word;
-        }
-
-        .qr-code {
-            width: 120px;
-            height: 120px;
+        /* ====== QR CODE STYLING ====== */
+        .qr-code-container {
+            position: relative;
+            width: 110px;
+            max-width: 110px;
+            height: auto;
             object-fit: contain;
             flex-shrink: 0;
         }
 
-        /* ====== PAGE CONTROLS ====== */
+        /* Centered DENR logo overlay on QR code (for branding) */
+        .qr-code-container__logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%;
+            height: 30%;
+        }
+
+        .qr-code {
+            width: 100%;
+            height: 100%
+        }
+
+        /* ========================================
+           SECTION: RESIZE HANDLE
+           - Positioned at bottom-right of container
+           - Indicates resize capability
+           - Visible only after QR generation
+           ======================================== */
+        .qr-barcode-resize-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            right: 6px;
+            bottom: 6px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            cursor: se-resize;
+            z-index: 12;
+        }
+
+        /* Hide resize handle by default until QR/barcode is generated */
+        .qr-barcode-resize-handle.hide {
+            display: none;
+        }
+
+        /* Visual corner indicator on resize handle */
+        .qr-barcode-resize-handle::before {
+            content: '';
+            position: absolute;
+            right: 3px;
+            bottom: 3px;
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid white;
+            border-bottom: 2px solid white;
+        }
+
+        /* ====== PAGE NAVIGATION CONTROLS ====== */
         .pdf-controls {
             display: flex;
             justify-content: center;
@@ -149,7 +274,7 @@
             margin-top: 20px;
         }
 
-        /* ====== SIDEBAR ====== */
+        /* ====== LAYOUT: SIDEBAR & MAIN CONTENT ====== */
         #left-side-panel {
             flex: 0 0 300px;
             align-self: flex-start;
@@ -160,7 +285,7 @@
             min-width: 0;
         }
 
-        /* ====== RESPONSIVE ====== */
+        /* ====== RESPONSIVE: TABLET & BELOW ====== */
         @media (max-width: 1100px) {
             .content-container {
                 flex-direction: column;
@@ -177,10 +302,16 @@
             }
         }
 
-        /* ====== PRINT STYLES ====== */
+        /* ========================================
+           PRINT MODE STYLES
+           Optimized for physical printing
+           - Full-page layout without margins
+           - Hides UI elements (resize handle, controls)
+           - Color preservation for accurate output
+           ======================================== */
         @media print {
             @page {
-                size: A4;
+                size: A4 portrait;
                 margin: 0;
                 padding: 0;
             }
@@ -193,12 +324,14 @@
                 overflow: hidden;
             }
 
+            /* Hide all elements by default, show only PDF content */
             * {
                 visibility: hidden;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
+            /* Ensure PDF paper and all children are visible during print */
             #pdf-paper,
             #pdf-paper * {
                 visibility: visible;
@@ -208,12 +341,13 @@
                 position: fixed;
                 top: 0;
                 left: 0;
-                width: 100vw;
-                height: 100vh;
+                width: 100%;
+                height: 100%;
                 margin: 0;
                 padding: 0;
                 box-shadow: none;
                 border-radius: 0;
+                overflow: hidden;
             }
 
             #pdf-canvas {
@@ -221,64 +355,32 @@
                 height: 100%;
             }
 
+            /* Keep QR/barcode container visible and positioned during print */
             #qr-barcode-container {
-                scale: 0.6;
                 visibility: visible;
-                position: absolute;
+                left: var(--print-left, 20px);
+                top: var(--print-top, 20px);
+                width: calc(var(--qr-container-base-width) * var(--qr-scale));
+                height: calc(var(--qr-container-base-height) * var(--qr-scale));
             }
 
-            .qr-barcode-container__flex {
-                background: transparent;
-                box-shadow: none;
-                padding: 0;
-            }
-
-            .denr-logo {
-                display: flex;
-                gap: 10px;
-                align-items: center;
-            }
-
-            .denr-logo__img {
-                height: 70px;
-                width: 70px;
-            }
-
-            .denr-logo__txt {
-                color: black;
-                text-align: left;
-                margin: 0;
-                font-family: 'Tahoma', Arial, sans-serif;
-                font-size: 16px;
-                line-height: 1.2em;
-                font-weight: 600;
-                white-space: normal;
-            }
-
-            .denr-logo__txt span {
-                font-weight: 900;
-                font-size: 14px;
-            }
-
-            .qr-code {
-                width: 150px;
-                height: 150px;
-            }
-
-            .barcode-txt {
-                font-size: 14px;
+            /* Hide resize handle during print mode */
+            .qr-barcode-resize-handle {
+                display: none;
             }
         }
     </style>
 
+    <!-- ====== HTML: PAGE LAYOUT ====== -->
     <div class="content-container">
-        <!-- Left Sidebar Panel -->
+        <!-- ====== LEFT SIDEBAR: DOCUMENT INFO & CONTROLS ====== -->
         <div id="left-side-panel" class="col-12 col-lg-3">
+            <!-- Back button -->
             <button onclick="history.back()" class="btn btn-secondary mb-3">
                 &larr; Back
             </button>
             
-            <!-- Document Information -->
+            <!-- Document metadata display -->
             <div class="document-information-container mb-5">
                 <div>
                     <label>Document Title:</label>
@@ -306,7 +408,7 @@
                 </div>
             </div>
 
-            <!-- Paper Size and Print Options -->
+            <!-- Paper size selector -->
             <div class="mb-3">
                 <label for="paperSize" class="small font-weight-bold d-block mb-2">Select Paper Size</label>
                 <select wire:model="paper_size" id="paperSize" class="form-control form-control-sm">
@@ -316,18 +418,20 @@
                 </select>
             </div>
 
+            <!-- Generate QR & Barcode button (Livewire action) -->
             <button wire:click="generateQrBarcode" 
                 id="generate-qr-barcode-btn"
                 class="btn btn-success btn-block mt-2">
                 <i class="fas fa-qrcode mr-2"></i> Generate QR & Barcode
             </button>
 
+            <!-- Print button -->
             <button id="print-btn" class="btn btn-primary btn-block mt-2">
                 <i class="fas fa-print mr-2"></i> Print
             </button>
         </div>
 
-        <!-- Main Content Area -->
+        <!-- ====== MAIN CONTENT: FILE PREVIEW ====== -->
         <div id="main-content" class="col-12 col-lg-9">
             @if($file)
                 @php
@@ -336,6 +440,7 @@
                     $mime = Storage::disk('public')->mimeType($path) ?: 'application/octet-stream';
                 @endphp
 
+                {{-- ====== IMAGE PREVIEW ====== --}}
                 @if(str_starts_with($mime, 'image/'))
                     @php
                         try {
@@ -351,49 +456,60 @@
                         <p class="text-muted">Error loading image.</p>
                     @endif
 
+                {{-- ====== PDF PREVIEW WITH QR/BARCODE OVERLAY ====== --}}
                 @elseif($mime === 'application/pdf')
                     @php
                         $pdfUrl = url('storage/' . $path);
                     @endphp
                     
+                    <!-- Paper/Page container -->
                     <div id="pdf-paper">
-                        {{-- PDF Canvas --}}
+                        <!-- Canvas for rendering PDF pages -->
                         <canvas wire:ignore id="pdf-canvas"></canvas>
 
-                        {{-- QR & Barcode Container --}}
+                        <!-- QR & Barcode overlay container (draggable & resizable) -->
                         <div id="qr-barcode-container">
-                            @if($qr_base64 || $barcode_html)
-                                <div class="qr-barcode-container__flex">
-                                    <div class="bar-code-logo-container">
-                                        <div class="denr-logo">
-                                            <img class="denr-logo__img" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
-                                            <p class="denr-logo__txt">
-                                                Department of Environment <br>
-                                                and Natural Resources <br>
-                                                <span>PENRO - Marinduque</span>
-                                            </p>
+                            <div class="qr-barcode-inner">
+                                <!-- Only show QR/barcode content if generated -->
+                                @if($qr_src || $barcode_src)
+                                    <div class="qr-barcode-container__flex">
+                                        <!-- Left section: DENR logo + barcode -->
+                                        <div class="bar-code-logo-container">
+                                            <!-- DENR organization logo and name -->
+                                            <div class="denr-logo">
+                                                <img class="denr-logo__img" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
+                                                <p class="denr-logo__txt">
+                                                    Department of Environment <br>
+                                                    and Natural Resources <br>
+                                                    <span>PENRO - Marinduque</span>
+                                                </p>
+                                            </div>
+
+                                            <!-- Document barcode (if generated) -->
+                                            @if($barcode_src)
+                                                <div>
+                                                    <img class="barcode" src="{{ $barcode_src }}" alt="Barcode" />
+                                                </div>
+                                            @endif
                                         </div>
 
-                                        @if($barcode_html)
-                                            <div>
-                                                <div class="barcode">{!! $barcode_html !!}</div>
-                                                <p class="barcode-txt">
-                                                    {{ $barcode_code ?? $file->barcode_no ?? $file->doc_control_no }}
-                                                </p>
+                                        <!-- Right section: QR code with centered logo overlay -->
+                                        @if($qr_src)
+                                            <div class="qr-code-container">
+                                                <img class="qr-code-container__logo" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
+                                                <img class="qr-code" src="{{ $qr_src }}" alt="QR Code" />
                                             </div>
                                         @endif
                                     </div>
-
-                                    {{-- QR Code --}}
-                                    @if($qr_base64)
-                                        <img class="qr-code" src="data:image/png;base64,{{ $qr_base64 }}" alt="QR Code" />
-                                    @endif
-                                </div>
-                            @endif
+                                @endif
+                            </div>
+                            
+                            <!-- Resize handle (visible only after generation) -->
+                            <div class="qr-barcode-resize-handle {{ $showResizeHandle ? '' : 'hide' }}" aria-label="Resize QR container"></div>
                         </div>
                     </div>
 
-                    {{-- Page Control Buttons --}}
+                    <!-- PDF page navigation controls -->
                     <div class="pdf-controls">
                         <button id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>&#8592; Prev</button>
                         <span id="pdf-page-info" class="small text-muted">
@@ -402,18 +518,32 @@
                         <button id="pdf-next" class="btn btn-sm btn-outline-secondary">Next &#8594;</button>
                     </div>
 
+                    <!-- PDF.js Library & JavaScript Engine -->
                     <script>
+                        /**
+                         * PDF Viewer with QR Code Overlay
+                         * 
+                         * Features:
+                         * 1. Renders PDF pages using PDF.js library
+                         * 2. Supports page navigation (prev/next)
+                         * 3. Paper size selection (A4, Short, Long)
+                         * 4. Draggable QR/barcode container
+                         * 5. Resizable container with proportional scaling
+                         * 6. Print-optimized rendering
+                         */
                         (function () {
+                            // Configuration
                             const PDF_URL = @json($pdfUrl);
                             const root = document.documentElement;
 
+                            // Supported paper sizes with dimensions (in pixels)
                             const PAPER_SIZES = {
                                 'A4':    { width: 794,  height: 1123 },
                                 'Short': { width: 816,  height: 1056 },
                                 'Long':  { width: 816,  height: 1344 },
                             };
 
-                            // DOM elements
+                            // DOM Element References
                             const canvas             = document.getElementById('pdf-canvas');
                             const ctx                = canvas.getContext('2d');
                             const paper              = document.getElementById('pdf-paper');
@@ -424,28 +554,40 @@
                             const paperSelect        = document.getElementById('paperSize');
                             const printButton        = document.getElementById('print-btn');
                             const qrBarcodeContainer = document.getElementById('qr-barcode-container');
+                            const qrResizeHandle     = document.querySelector('.qr-barcode-resize-handle');
 
-                            // State
-                            let pdfDoc      = null;
-                            let currentPage = 1;
-                            let renderTask  = null;
+                            // Extract base QR container dimensions from CSS variables
+                            const QR_BASE = {
+                                width: parseFloat(getComputedStyle(root).getPropertyValue('--qr-container-base-width')) || 350,
+                                height: parseFloat(getComputedStyle(root).getPropertyValue('--qr-container-base-height')) || 180,
+                            };
+
+                            // State Variables
+                            let pdfDoc      = null;          // Loaded PDF document
+                            let currentPage = 1;             // Current page number
+                            let renderTask  = null;          // Current rendering task
                             let currentSize = paperSelect ? paperSelect.value : 'A4';
+                            let isResizing  = false;         // Track active resize operation
+                            let resizeStartX = 0, resizeStartY = 0;
+                            let resizeStartWidth = 0, resizeStartHeight = 0;
 
-                            // ====== APPLY PAPER SIZE ====== //
+                            /**
+                             * Apply paper size and update rendering
+                             * Updates CSS variables for paper dimensions
+                             */
                             function applyPaperSize(size) {
                                 const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
-                                
-                                // Use CSS custom properties instead of direct style manipulation
                                 root.style.setProperty('--paper-width', dim.width + 'px');
                                 root.style.setProperty('--paper-height', dim.height + 'px');
                                 root.style.setProperty('--paper-width-number', dim.width);
                                 root.style.setProperty('--paper-height-number', dim.height);
-
-                                // Render the page with new dimensions
                                 renderPage(currentPage);
                             }
 
-                            // ====== RENDER PAGE ====== //
+                            /**
+                             * Render a specific PDF page to canvas
+                             * Scales PDF to fit within paper bounds
+                             */
                             function renderPage(num) {
                                 if (!pdfDoc) return;
 
@@ -455,9 +597,9 @@
                                     const paperH  = dim.height - 16;
                                     const pageVp  = page.getViewport({ scale: 1 });
 
+                                    // Calculate scale to fit page within paper dimensions
                                     let scale     = paperW / pageVp.width;
                                     const scaledH = pageVp.height * scale;
-
                                     if (scaledH > paperH) {
                                         scale = paperH / pageVp.height;
                                     }
@@ -466,10 +608,12 @@
                                     canvas.width   = viewport.width;
                                     canvas.height  = viewport.height;
 
+                                    // Cancel previous render task if still running
                                     if (renderTask) {
                                         renderTask.cancel();
                                     }
 
+                                    // Render page to canvas
                                     renderTask = page.render({ canvasContext: ctx, viewport });
                                     renderTask.promise
                                         .then(function () {
@@ -486,7 +630,10 @@
                                 });
                             }
 
-                            // ====== INIT PDF ====== //
+                            /**
+                             * Initialize PDF.js and load document
+                             * Waits for PDF.js library to be loaded
+                             */
                             function initPdf() {
                                 if (typeof window.pdfjsLib === 'undefined') {
                                     setTimeout(initPdf, 100);
@@ -501,12 +648,13 @@
                                         renderPage(currentPage);
                                     })
                                     .catch(function (err) {
-                                        paper.innerHTML =
-                                            '<p class="text-danger small p-3">Failed to load PDF: ' + err.message + '</p>';
+                                        paper.innerHTML = '<p class="text-danger small p-3">Failed to load PDF: ' + err.message + '</p>';
                                     });
                             }
 
-                            // ====== PAPER SIZE CHANGE ====== //
+                            /**
+                             * Paper size change handler
+                             */
                             if (paperSelect) {
                                 paperSelect.addEventListener('change', function () {
                                     currentSize = this.value;
@@ -514,23 +662,22 @@
                                 });
                             }
 
-                            // ====== DRAGGABLE QR/BARCODE CONTAINER ====== //
+                            /**
+                             * Enable drag functionality for QR/barcode container
+                             * Constrains movement within paper bounds
+                             */
                             function enableDraggableQrBarcode() {
                                 if (!qrBarcodeContainer) return;
 
                                 let isDragging = false;
-                                let dragOffsetX = 0;
-                                let dragOffsetY = 0;
+                                let dragOffsetX = 0, dragOffsetY = 0;
 
                                 qrBarcodeContainer.addEventListener('mousedown', function (e) {
                                     isDragging = true;
-                                    
                                     const rect  = qrBarcodeContainer.getBoundingClientRect();
                                     const paperRect = paper.getBoundingClientRect();
-                                    
                                     dragOffsetX = e.clientX - rect.left;
                                     dragOffsetY = e.clientY - rect.top;
-
                                     e.preventDefault();
                                 });
 
@@ -543,15 +690,14 @@
                                     let newLeft = e.clientX - paperRect.left - dragOffsetX;
                                     let newTop  = e.clientY - paperRect.top  - dragOffsetY;
 
-                                    // Clamp to paper bounds
+                                    // Constrain to paper bounds
                                     const maxLeft = paperRect.width  - containerRect.width;
                                     const maxTop  = paperRect.height - containerRect.height;
-
                                     newLeft = Math.max(0, Math.min(newLeft, maxLeft));
                                     newTop  = Math.max(0, Math.min(newTop,  maxTop));
 
-                                    qrBarcodeContainer.style.left = newLeft + 'px';
-                                    qrBarcodeContainer.style.top  = newTop  + 'px';
+                                    qrBarcodeContainer.style.left = `${newLeft}px`;
+                                    qrBarcodeContainer.style.top  = `${newTop}px`;
                                 });
 
                                 document.addEventListener('mouseup', function () {
@@ -561,7 +707,81 @@
 
                             enableDraggableQrBarcode();
 
-                            // ====== PAGE NAVIGATION ====== //
+                            /**
+                             * Enable resize functionality for QR/barcode container
+                             * Maintains proportional scaling with min/max constraints
+                             */
+                            function enableResizableQrBarcode() {
+                                if (!qrBarcodeContainer || !qrResizeHandle) return;
+
+                                qrResizeHandle.addEventListener('mousedown', function (e) {
+                                    isResizing = true;
+                                    resizeStartX = e.clientX;
+                                    resizeStartY = e.clientY;
+                                    resizeStartWidth = qrBarcodeContainer.getBoundingClientRect().width;
+                                    resizeStartHeight = qrBarcodeContainer.getBoundingClientRect().height;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                });
+
+                                document.addEventListener('mousemove', function (e) {
+                                    if (!isResizing) return;
+
+                                    const paperRect = paper.getBoundingClientRect();
+                                    const deltaX = e.clientX - resizeStartX;
+                                    const deltaY = e.clientY - resizeStartY;
+
+                                    let newWidth = resizeStartWidth + deltaX;
+                                    let newHeight = resizeStartHeight + deltaY;
+
+                                    // Apply size constraints
+                                    const minWidth = QR_BASE.width * 0.1;
+                                    const minHeight = QR_BASE.height * 0.1;
+                                    const maxWidth = Math.max(minWidth, paperRect.width - qrBarcodeContainer.offsetLeft - 16);
+                                    const maxHeight = Math.max(minHeight, paperRect.height - qrBarcodeContainer.offsetTop - 16);
+
+                                    newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+                                    newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
+
+                                    // Calculate proportional scale
+                                    const scaleX = newWidth / QR_BASE.width;
+                                    const scaleY = newHeight / QR_BASE.height;
+                                    const scale = Math.max(0.1, Math.min(scaleX, scaleY));
+
+                                    qrBarcodeContainer.style.width = `${QR_BASE.width * scale}px`;
+                                    qrBarcodeContainer.style.height = `${QR_BASE.height * scale}px`;
+                                    qrBarcodeContainer.style.setProperty('--qr-scale', scale.toString());
+                                });
+
+                                document.addEventListener('mouseup', function () {
+                                    if (isResizing) {
+                                        isResizing = false;
+                                    }
+                                });
+                            }
+
+                            enableResizableQrBarcode();
+
+                            /**
+                             * Sync current on-screen QR container position to print-ready values.
+                             * Uses the current paper preview dimensions and converts pixels to millimeters.
+                             */
+                            function syncQrBarcodePositionForPrint() {
+                                if (!qrBarcodeContainer || !paper) return;
+
+                                const paperRect = paper.getBoundingClientRect();
+                                const computed = getComputedStyle(qrBarcodeContainer);
+                                const leftPx = parseFloat(computed.left) || 0;
+                                const topPx = parseFloat(computed.top) || 0;
+
+                                // Keep pixel positions for print (since print page is also in pixels)
+                                qrBarcodeContainer.style.setProperty('--print-left', `${Math.max(leftPx, 0)}px`);
+                                qrBarcodeContainer.style.setProperty('--print-top', `${Math.max(topPx, 0)}px`);
+                            }
+
+                            /**
+                             * Page navigation handlers
+                             */
                             prevBtn.addEventListener('click', function () {
                                 if (currentPage > 1) {
                                     renderPage(--currentPage);
@@ -574,17 +794,28 @@
                                 }
                             });
 
-                            // ====== PRINT ====== //
+                            /**
+                             * Print handler
+                             */
                             printButton.addEventListener('click', function () {
+                                syncQrBarcodePositionForPrint();
                                 window.print();
                             });
 
-                            // Initialize
+                            window.addEventListener('beforeprint', syncQrBarcodePositionForPrint);
+                            window.addEventListener('afterprint', function () {
+                                if (!qrBarcodeContainer) return;
+                                qrBarcodeContainer.style.removeProperty('--print-left');
+                                qrBarcodeContainer.style.removeProperty('--print-top');
+                            });
+
+                            // Initialize PDF viewer
                             applyPaperSize(currentSize);
                             initPdf();
                         })();
                     </script>
 
+                {{-- ====== TEXT FILE PREVIEW ====== --}}
                 @elseif(str_starts_with($mime, 'text/'))
                     @php
                         try {
@@ -595,6 +826,7 @@
                     @endphp
                     <pre style="white-space: pre-wrap; word-wrap: break-word; max-height: 400px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">{{ $content }}</pre>
 
+                {{-- ====== OTHER FILE TYPES ====== --}}
                 @else
                     <object data="{{ $url }}" type="{{ $mime }}" width="100%" height="400px">
                         <p class="text-muted">Cannot display preview. <a href="{{ $url }}" target="_blank">Download the file</a></p>
@@ -606,6 +838,7 @@
         </div>
     </div>
 
+    {{-- Session status message --}}
     @if (session()->has('message'))
         <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
             {{ session('message') }}

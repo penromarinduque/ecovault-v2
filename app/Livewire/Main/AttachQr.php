@@ -3,10 +3,6 @@
 namespace App\Livewire\Main;
 
 use App\Models\File;
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Endroid\QrCode\Writer\PngWriter;
-use Milon\Barcode\DNS1D;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -16,9 +12,10 @@ class AttachQr extends Component
     public $file;
     public $paper_size   = 'A4';
     public $document_meta = [];
-    public $qr_base64    = null;
-    public $barcode_html = null;
+    public $qr_src       = null;
+    public $barcode_src  = null;
     public $barcode_code = null;
+    public $showResizeHandle = false;
 
     public function mount($main_file_id)
     {
@@ -41,30 +38,17 @@ class AttachQr extends Component
 
     public function generateQrBarcode()
     {
-        if (!$this->file) return;
+        if (!$this->file) {
+            return;
+        }
 
-        $currentYear        = now()->year;
-        $controlNo          = $this->file->doc_control_no ?? $this->file->id;
-        $fileName           = $this->file->name;
-        $qrCode_string      = "DENR-{$currentYear}-{$controlNo}-{$fileName}";
-        $this->barcode_code = "DENR-{$currentYear}-{$controlNo}";
+        $barcodeNo = $this->file->barcode_no ?? $this->file->doc_control_no ?? $this->file->id;
+        $validateUrl = route('validate-qr', ['id' => $barcodeNo]);
 
-        // Generate QR Code with DENR logo — v6 correct syntax
-        $builder = new Builder(
-            writer: new PngWriter(),
-            data: $qrCode_string,
-            errorCorrectionLevel: ErrorCorrectionLevel::High,
-            logoPath: public_path('LOGO.png'),
-            logoResizeToWidth: 120,
-            logoPunchoutBackground: true,
-        );
-
-        $result = $builder->build();
-        $this->qr_base64 = base64_encode($result->getString());
-
-        // Generate Barcode
-        $dns = new DNS1D();
-        $this->barcode_html = $dns->getBarcodeHTML($this->barcode_code, 'C128', '2', 70);
+        $this->qr_src = 'https://api.qrcode-monkey.com/qr/custom?data=' . urlencode($validateUrl);
+        $this->barcode_src = 'https://barcodeapi.org/api/128/' . urlencode($barcodeNo);
+        $this->barcode_code = "DENR-" . now()->year . "-" . $barcodeNo;
+        $this->showResizeHandle = true;
     }
 
     public function render()
