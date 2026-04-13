@@ -172,6 +172,39 @@
                                 </td>
                                 <td >
                                     <div class="d-flex gap-1 g-1">
+<<<<<<< HEAD
+                                        <div class="d-flex align-items-center" wire:ignore.self>
+                                        <div class="btn-group" role="group">
+                                            
+                                            <a class="btn btn-primary"
+                                            title="QR Code"
+                                            data-toggle="tooltip"
+                                            target="_blank"
+                                            href="https://api.qrcode-monkey.com/qr/custom?data={{ route('validate-qr', ['id' => $file->barcode_no]) }}&config=%7B%22logo%22%3A%229e93e1292f5126d21955919229715d0bbd701294.png%22%7D">
+                                                <i class="fa-solid fa-qrcode"></i>
+                                            </a>
+
+                                            <a class="btn btn-primary"
+                                            title="Barcode"
+                                            data-toggle="tooltip"
+                                            href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}"
+                                            target="_blank">
+                                                <i class="fa-solid fa-barcode"></i>
+                                            </a>
+
+                                            <a class="btn btn-primary"
+                                            title="Barcode & QR Code"
+                                            data-toggle="tooltip"
+                                            href="{{ route('main.get-qr-and-barcode', ['id' => $file->id]) }}"
+                                            target="_blank">
+                                                <i class="fa-solid fa-barcode"></i> +
+                                                <i class="fa-solid fa-qrcode"></i>
+                                            </a>
+
+                                        </div>
+                                        </div>
+=======
+>>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
                                         <button class="m-1 btn-outline-primary btn " type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
                                             <i class="fa-solid fa-download"></i>
                                         </button>
@@ -186,11 +219,21 @@
                                         <button class="m-1 btn btn-outline-primary" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
+<<<<<<< HEAD
+                                         <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">
+                                            <i class="fa-solid fa-qrcode"></i> Attach QR Code
+                                        </a>
+                                        <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+
+=======
                                         @can('upload-file', [App\Models\Folder::class, $main_folder_id])
                                             <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         @endcan 
+>>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
                                     </div>
                                 </td>
                             </tr>

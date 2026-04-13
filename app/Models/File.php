@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 use setasign\Fpdi\Fpdi;
 
 class File extends Model
@@ -47,7 +48,7 @@ class File extends Model
             $file_name = Str::random(10) . uniqid() . '.' . $extension;
 
             // Store uploaded file first
-            $filePath = $document->storeAs('uploads', $file_name);
+            $filePath = $document->storeAs('uploads', $file_name, 'public');
 
             // Generate QR code image
             $qr_builder = new Builder(
@@ -217,5 +218,52 @@ class File extends Model
         Log::info("Processing ZIP file {$filePath} with QR {$qrCodePath}");
         // Add logic here if needed
         return $filePath;
+    }
+
+    /**
+     * Generate QR Code for the file
+     */
+    public function generateQrCode()
+    {
+        try {
+            $url = route('validate-qr', $this->id);
+
+            $qr_builder = new Builder(
+                writer: new PngWriter(),
+                data: $url,
+                size: 200,
+                margin: 10
+            );
+            $qr = $qr_builder->build();
+
+            $this->qr_code = 'data:image/png;base64,' . base64_encode($qr->getString());
+            $this->save();
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Error generating QR code: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Generate Barcode for the file
+     */
+    public function generateBarcode()
+    {
+        try {
+            $generator = new BarcodeGeneratorPNG();
+            $barcodeData = $this->id; // Use file ID as barcode data
+
+            $barcodeImage = $generator->getBarcode($barcodeData, $generator::TYPE_CODE_128);
+
+            $this->barcode = 'data:image/png;base64,' . base64_encode($barcodeImage);
+            $this->save();
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Error generating barcode: ' . $e->getMessage());
+            return false;
+        }
     }
 }

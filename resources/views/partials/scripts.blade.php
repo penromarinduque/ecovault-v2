@@ -26,9 +26,14 @@
 <!--c3 charts -->
 <script src="{{ asset('assets/extra-libs/c3/d3.min.js') }}"></script>
 <script src="{{ asset('assets/extra-libs/c3/c3.min.js') }}"></script>
-{{-- <script src="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js') }}"></script> --}}
-{{-- <script src="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js') }}"></script> --}}
-{{-- <script src="{{ asset('dist/js/pages/dashboards/dashboard1.js') }}"></script> --}}
+
+<!-- PDF.js -->
+<script type="module">
+    import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    window.pdfjsLib = pdfjsLib;
+</script>
 
 <script>
     function togglePasswordVisibility(fieldId, event) {
@@ -45,14 +50,13 @@
             icon.classList.add('fa-eye');
         }
     }
-
 </script>
+
 <script>
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
 </script>
+
 @yield('scripts')
 @livewireScripts
-
-
