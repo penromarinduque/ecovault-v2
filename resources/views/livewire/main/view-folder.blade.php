@@ -157,7 +157,7 @@
                                 <td>
                                     <div class="d-flex align-items-center" wire:ignore.self>
                                         <div class="btn-group" role="group" >
-                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
+                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%22c7e3dafa91a9a2806b38cf5992939868cefc6171.svg%22}">
                                                 <i class="fa-solid fa-qrcode"></i>
                                             </a>
                                             <a type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip" href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}" target="_blank">
