@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\User\UserIndex;
+<<<<<<< HEAD
+use App\Livewire\Main\AttachQr;
+=======
 use App\Livewire\Main\Validate;
+>>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
 use Illuminate\Http\Request;
@@ -35,6 +39,7 @@ Route::group(["prefix" => "main", "as" => "main."], function () {
 
     Route::group(["prefix" => "folders", "as" => "folders."], function () {
         Route::get('/show/{main_folder_id}', ViewFolder::class)->middleware(['auth', 'verified'])->name('show');
+        Route::get('/attachqr/{main_file_id}', AttachQr::class)->middleware(['auth', 'verified'])->name('attachqr');
     });
 });
 
