@@ -790,18 +790,37 @@
 
                                 const paperRect = paper.getBoundingClientRect();
                                 const computed = getComputedStyle(qrBarcodeContainer);
-                                const leftPx = parseFloat(computed.left) || 0;
-                                const topPx = parseFloat(computed.top) || 0;
  
-                                // Keep pixel positions for print (since print page is also in pixels)
-                                const codeWidth = qrBarcodeContainer.style.width ? parseFloat(qrBarcodeContainer.style.width) : computed.getPropertyValue('--qr-container-base-width');
-                                const codeHeight = qrBarcodeContainer.style.height ? parseFloat(qrBarcodeContainer.style.height) : computed.getPropertyValue('--qr-container-base-height');
-                                console.log(codeWidth, codeHeight, computed.getPropertyValue('--qr-scale'));
-                                qrBarcodeContainer.style.setProperty("--qr-container-base-width", `${((codeWidth/paperRect.width) * 100) * computed.getPropertyValue('--qr-scale')}vw`);
-                                qrBarcodeContainer.style.setProperty("--qr-container-base-height", `${((codeHeight/paperRect.height) * 100) * computed.getPropertyValue('--qr-scale')}vh`);
-                                qrBarcodeContainer.style.setProperty('--print-left', `${(qrBarcodeContainer.offsetLeft/paperRect.width) * 100}vw`);
-                                qrBarcodeContainer.style.setProperty('--print-top', `${(qrBarcodeContainer.offsetTop/paperRect.height) * 100}vh`);
+                                const scale = parseFloat(computed.getPropertyValue('--qr-scale')) || 1;
+
+                                const widthPercent = (codeWidth / paperRect.width) * 100;
+                                const heightPercent = (codeHeight / paperRect.height) * 100;
+
+                                const leftPercent = (leftPx / paperRect.width) * 100;
+                                const topPercent = (topPx / paperRect.height) * 100;
+
+                                qrBarcodeContainer.style.setProperty("--qr-container-base-width", `${widthPercent * scale}%`);
+                                qrBarcodeContainer.style.setProperty("--qr-container-base-height", `${heightPercent * scale}%`);
+                                qrBarcodeContainer.style.setProperty('--print-left', `${leftPercent}%`);
+                                qrBarcodeContainer.style.setProperty('--print-top', `${topPercent}%`);
                             }
+                            // function syncQrBarcodePositionForPrint() {
+                            //     if (!qrBarcodeContainer || !paper) return;
+
+                            //     const paperRect = paper.getBoundingClientRect();
+                            //     const computed = getComputedStyle(qrBarcodeContainer);
+                            //     const leftPx = parseFloat(computed.left) || 0;
+                            //     const topPx = parseFloat(computed.top) || 0;
+ 
+                            //     // Keep pixel positions for print (since print page is also in pixels)
+                            //     const codeWidth = qrBarcodeContainer.style.width ? parseFloat(qrBarcodeContainer.style.width) : computed.getPropertyValue('--qr-container-base-width');
+                            //     const codeHeight = qrBarcodeContainer.style.height ? parseFloat(qrBarcodeContainer.style.height) : computed.getPropertyValue('--qr-container-base-height');
+                            //     console.log(codeWidth, codeHeight, computed.getPropertyValue('--qr-scale'));
+                            //     qrBarcodeContainer.style.setProperty("--qr-container-base-width", `${((codeWidth/paperRect.width) * 100) * computed.getPropertyValue('--qr-scale')}vw`);
+                            //     qrBarcodeContainer.style.setProperty("--qr-container-base-height", `${((codeHeight/paperRect.height) * 100) * computed.getPropertyValue('--qr-scale')}vh`);
+                            //     qrBarcodeContainer.style.setProperty('--print-left', `${(qrBarcodeContainer.offsetLeft/paperRect.width) * 100}vw`);
+                            //     qrBarcodeContainer.style.setProperty('--print-top', `${(qrBarcodeContainer.offsetTop/paperRect.height) * 100}vh`);
+                            // }
 
                             /**
                              * Page navigation handlers
