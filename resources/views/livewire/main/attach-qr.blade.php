@@ -76,13 +76,13 @@
             margin: 0 auto 20px;
             overflow: hidden;
             contain: layout style paint; /* Performance optimization */
-            width: 1060px;
+            width: var(--paper-width);
         }
 
         #pdf-canvas {
             display: block;
-            width: 1060px;
-            height: 1650px;
+            width: var(--paper-width);
+            height: var(--paper-height);
         }
 
         /* ========================================
@@ -371,8 +371,10 @@
                 visibility: visible;
                 left: var(--print-left, 20px);
                 top: var(--print-top, 20px);
-                width: calc(var(--qr-container-base-width) * var(--qr-scale));
-                height: calc(var(--qr-container-base-height) * var(--qr-scale));
+                /* width: calc(var(--qr-container-base-width) * var(--qr-scale));
+                height: calc(var(--qr-container-base-height) * var(--qr-scale)); */
+                /* width: var(--qr-container-base-width * var(--qr-scale)); */
+                /* height: var(--qr-container-base-height ); */
             }
 
             /* Hide resize handle during print mode */
@@ -452,15 +454,15 @@
             @if($file)
                 @php
                     $path = 'uploads/'.$file->file_name;
-                    $url = Storage::disk('public')->url($path);
-                    $mime = Storage::disk('public')->mimeType($path) ?: 'application/octet-stream';
+                    $url = Storage::temporaryUrl($path, now()->addMinutes(60));
+                    $mime = Storage::mimeType($path) ?: 'application/octet-stream';
                 @endphp
 
                 {{-- ====== IMAGE PREVIEW ====== --}}
                 @if(str_starts_with($mime, 'image/'))
                     @php
                         try {
-                            $imageData = Storage::disk('public')->get($path);
+                            $imageData = Storage::get($path);
                             $base64 = 'data:' . $mime . ';base64,' . base64_encode($imageData);
                         } catch (\Exception $e) {
                             $base64 = '';
@@ -475,7 +477,7 @@
                 {{-- ====== PDF PREVIEW WITH QR/BARCODE OVERLAY ====== --}}
                 @elseif($mime === 'application/pdf')
                     @php
-                        $pdfUrl = url('storage/' . $path);
+                        $pdfUrl = Storage::temporaryUrl($path, now()->addMinutes(60));
                     @endphp
                     
                     <!-- Paper/Page container -->
@@ -493,7 +495,7 @@
                                         <div class="bar-code-logo-container">
                                             <!-- DENR organization logo and name -->
                                             <div class="denr-logo">
-                                                <img class="denr-logo__img" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
+                                                <img class="denr-logo__img" src="{{ asset('LOGO.svg') }}" alt="DENR Logo">
                                                 <p class="denr-logo__txt">
                                                     Department of Environment <br>
                                                     and Natural Resources <br>
@@ -512,7 +514,7 @@
                                         <!-- Right section: QR code with centered logo overlay -->
                                         @if($qr_src)
                                             <div class="qr-code-container">
-                                                <img class="qr-code-container__logo" src="{{ asset('LOGO.png') }}" alt="DENR Logo">
+                                                <img class="qr-code-container__logo" src="{{ asset('LOGO.svg') }}" alt="DENR Logo">
                                                 <img class="qr-code" src="{{ $qr_src }}" alt="QR Code" />
                                             </div>
                                         @endif
@@ -790,10 +792,15 @@
                                 const computed = getComputedStyle(qrBarcodeContainer);
                                 const leftPx = parseFloat(computed.left) || 0;
                                 const topPx = parseFloat(computed.top) || 0;
-
+ 
                                 // Keep pixel positions for print (since print page is also in pixels)
-                                qrBarcodeContainer.style.setProperty('--print-left', `${Math.max(leftPx, 0)}px`);
-                                qrBarcodeContainer.style.setProperty('--print-top', `${Math.max(topPx, 0)}px`);
+                                const codeWidth = qrBarcodeContainer.style.width ? parseFloat(qrBarcodeContainer.style.width) : computed.getPropertyValue('--qr-container-base-width');
+                                const codeHeight = qrBarcodeContainer.style.height ? parseFloat(qrBarcodeContainer.style.height) : computed.getPropertyValue('--qr-container-base-height');
+                                console.log(codeWidth, codeHeight, computed.getPropertyValue('--qr-scale'));
+                                qrBarcodeContainer.style.setProperty("--qr-container-base-width", `${((codeWidth/paperRect.width) * 100) * computed.getPropertyValue('--qr-scale')}vw`);
+                                qrBarcodeContainer.style.setProperty("--qr-container-base-height", `${((codeHeight/paperRect.height) * 100) * computed.getPropertyValue('--qr-scale')}vh`);
+                                qrBarcodeContainer.style.setProperty('--print-left', `${(qrBarcodeContainer.offsetLeft/paperRect.width) * 100}vw`);
+                                qrBarcodeContainer.style.setProperty('--print-top', `${(qrBarcodeContainer.offsetTop/paperRect.height) * 100}vh`);
                             }
 
                             /**
@@ -846,7 +853,7 @@
                 @elseif(str_starts_with($mime, 'text/'))
                     @php
                         try {
-                            $content = Storage::disk('public')->get($path);
+                            $content = Storage::get($path);
                         } catch (\Exception $e) {
                             $content = 'Error loading file content.';
                         }

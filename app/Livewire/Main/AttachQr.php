@@ -43,7 +43,7 @@ class AttachQr extends Component
         }
 
         $barcodeNo = $this->file->barcode_no ?? $this->file->doc_control_no ?? $this->file->id;
-        $validateUrl = route('validate-qr', ['id' => $barcodeNo]);
+        $validateUrl = route('validate-qr', ['id' => strtr(base64_encode($barcodeNo), '+/=', '-_,')]);
 
         $this->qr_src = 'https://api.qrcode-monkey.com/qr/custom?data=' . urlencode($validateUrl);
         $this->barcode_src = 'https://barcodeapi.org/api/128/' . urlencode($barcodeNo);

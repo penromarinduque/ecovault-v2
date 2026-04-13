@@ -1,12 +1,8 @@
 <?php
-
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\User\UserIndex;
-<<<<<<< HEAD
 use App\Livewire\Main\AttachQr;
-=======
 use App\Livewire\Main\Validate;
->>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
 use Illuminate\Http\Request;

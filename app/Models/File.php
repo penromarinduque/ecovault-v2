@@ -48,7 +48,7 @@ class File extends Model
             $file_name = Str::random(10) . uniqid() . '.' . $extension;
 
             // Store uploaded file first
-            $filePath = $document->storeAs('uploads', $file_name, 'public');
+            $filePath = $document->storeAs('uploads', $file_name);
 
             // Generate QR code image
             $qr_builder = new Builder(
