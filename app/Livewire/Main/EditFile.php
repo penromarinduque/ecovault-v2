@@ -22,8 +22,14 @@ class EditFile extends Component
     public $name = null;
     #[Validate('required|max:1000')]
     public $office_source = null;
-    #[Validate('required|max:100')]
+    #[Validate('required|max:255')]
+    public $released_to = null;
+    #[Validate('nullable|max:100')]
     public $control_no = null;
+    #[Validate('required|max:255')]
+    public $barcode_no = null;
+    #[Validate('required|max:255')]
+    public $action = null;
     #[Validate('required|exists:doc_classifications,id')]
     public $classification = null;
     #[Validate('required|date')]
@@ -39,6 +45,9 @@ class EditFile extends Component
         $this->name = $this->file->name;
         $this->office_source = $this->file->office_source;
         $this->control_no = $this->file->doc_control_no;
+        $this->released_to = $this->file->released_to;
+        $this->action = $this->file->action;
+        $this->barcode_no = $this->file->barcode_no;
         $this->classification = $this->file->doc_classification_id;
         $this->date_released = $this->file->date_released->format('Y-m-d');
         $this->name = $this->file->name;
@@ -65,6 +74,9 @@ class EditFile extends Component
                 $this->file->office_source = $this->office_source;
                 $this->file->doc_control_no = $this->control_no;
                 $this->file->doc_classification_id = $this->classification;
+                $this->file->released_to = $this->released_to;
+                $this->file->action = $this->action;
+                $this->file->barcode_no = $this->barcode_no;
                 $this->file->date_released = $this->date_released;
                 $this->file->save();
                 notyf()->position('y', 'top')->success('File updated successfully!');

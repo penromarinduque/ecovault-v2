@@ -28,6 +28,9 @@ class FolderPolicy
         if($user->isEncoder() && $user->canEncodeMainFolder($folder->main_folder_id)) { 
             return true;
         }
+        if($user->isViewer()) {
+            return true;
+        }
         return false;
     }
 

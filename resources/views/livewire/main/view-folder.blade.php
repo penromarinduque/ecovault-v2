@@ -45,6 +45,18 @@
         </ol>
     </nav>
     @endif
+
+    <div class="d-flex justify-content-end mb-3">
+        <form class="form-inline">
+            <label for="fileSortBy" class="form-label mr-2">Sort:</label>
+            <select name="folderSortOrder" id="folderSortOrder" class="form-control"  wire:model.live="folderSortOrder">
+                <option value="-">-Sort Order-</option>
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+        </form>
+    </div>
+
     <div class="row">
         @forelse ($folders as $folder)
         <div class="col-12 col-lg-4 col-sm-6">
@@ -103,6 +115,23 @@
     @if ($folder_id)
     <div class="card" >
         <div class="card-body">
+            <div class="d-flex justify-content-end mb-3">
+                <form class="form-inline">
+                    <label for="fileSortBy" class="form-label mr-2">Sort by:</label>
+                    <select name="fileSortBy" id="fileSortBy" class="form-control" wire:model.live="fileSortBy">
+                        <option value="-">-Sort By-</option>
+                        <option value="name">Title</option>
+                        <option value="date_released">Date Released</option>
+                    </select>
+                    &nbsp;&nbsp;&nbsp;
+                    <select name="fileSortOrder" id="fileSortOrder" class="form-control"  wire:model.live="fileSortOrder">
+                        <option value="-">-Sort Order-</option>
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </form>
+            </div>
+
             <input type="text" class="form-control mb-3" placeholder="Search files..." wire:model.live.debounce.300ms="search" />
         
             <div class="table-responsive" style="min-height: 800px !important;">
@@ -113,6 +142,7 @@
                             <th width="30px"></th>
                             <th>File</th>
                             <th>Date Released</th>
+                            <th>QR & Barcode</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -124,8 +154,25 @@
                                 </td>
                                 <td>{{ $file->name }}</td>
                                 <td>{{ $file->date_released->format('M d, Y') }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center" wire:ignore.self>
+                                        <div class="btn-group" role="group" >
+                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
+                                                <i class="fa-solid fa-qrcode"></i>
+                                            </a>
+                                            <a type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip" href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}" target="_blank">
+                                                <i class="fa-solid fa-barcode"></i>
+                                            </a>
+                                            <a type="button" class="btn btn-primary" title="Barcode & QR Code" data-toggle="tooltip" href="{{ route('main.get-qr-and-barcode', ['id' => $file->id]) }}" target="_blank">
+                                                <i class="fa-solid fa-barcode"></i> +
+                                                <i class="fa-solid fa-qrcode"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
                                 <td >
                                     <div class="d-flex gap-1 g-1">
+<<<<<<< HEAD
                                         <div class="d-flex align-items-center" wire:ignore.self>
                                         <div class="btn-group" role="group">
                                             
@@ -156,18 +203,23 @@
 
                                         </div>
                                         </div>
+=======
+>>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
                                         <button class="m-1 btn-outline-primary btn " type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
                                             <i class="fa-solid fa-download"></i>
                                         </button>
                                         <a class="m-1 btn btn-outline-primary" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}" title="Preview" data-toggle="tooltip" >
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
-                                        <button class="m-1 btn btn-outline-primary" type="button" wire:click="moveFile({{ $file->id }})" title="Move" data-toggle="tooltip" >
-                                            <i class="fa-solid fa-arrows-up-down-left-right"></i>
-                                        </button>
+                                        @can('upload-file', [App\Models\Folder::class, $main_folder_id])
+                                            <button class="m-1 btn btn-outline-primary" type="button" wire:click="moveFile({{ $file->id }})" title="Move" data-toggle="tooltip" >
+                                                <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                                            </button>
+                                        @endcan
                                         <button class="m-1 btn btn-outline-primary" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
+<<<<<<< HEAD
                                          <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">
                                             <i class="fa-solid fa-qrcode"></i> Attach QR Code
                                         </a>
@@ -175,12 +227,19 @@
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
 
+=======
+                                        @can('upload-file', [App\Models\Folder::class, $main_folder_id])
+                                            <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        @endcan 
+>>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">No files found for this folder.</td>
+                                <td colspan="5" class="text-center">No files found for this folder.</td>
                             </tr>
                         @endforelse
                     </tbody>

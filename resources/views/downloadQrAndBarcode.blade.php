@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
 </head>
 <body>
-    <canvas id="qrBarcodeCanvas" width="288" height="192"></canvas>
+    <canvas id="qrBarcodeCanvas" width="226.77" height="151.18"></canvas>
     </canvas>
     {{-- @script --}}
     <script src="{{ asset('assets/js/jquery-4.js') }}"></script>
@@ -25,30 +25,31 @@
         const canvas = document.getElementById('qrBarcodeCanvas');
         
         const ctx = canvas.getContext('2d');
-        const qrCode = new Image(96, 96);
-        const barcode = new Image(192, 64);
-        const imageText = new Image(192, 55);
-        qrCode.src = 'https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => $file->barcode_no]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}';
+        const qrCode = new Image(80, 80);
+        const barcode = new Image(146, 50);
+        const imageText = new Image(146, 40);
+        qrCode.src = 'https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}';
         barcode.src = 'https://barcodeapi.org/api/128/{{ $file->barcode_no }}';
         imageText.src = '{{ asset("assets/images/barcode-text.png") }}';
         qrCode.onload = function() {
-            ctx.drawImage(qrCode, 192, 68, 96, 96);
+            ctx.drawImage(qrCode, 140, 65, 80, 80);
         };
         barcode.onload = function() {
-            ctx.drawImage(barcode, 0, 95, 192, 64);
+            ctx.drawImage(barcode, 0, 78, 146, 64);
         };
         imageText.onload = function() {
-            ctx.drawImage(imageText, 0, 40, 192, 55);
+            ctx.drawImage(imageText, 0, 0, 226, 65);
         };
         ctx.font = "50px Arial";
         ctx.fillText(
             "Department of Environment and Natural Resources", 
             0, 
             0,
-            192
+            226
         );
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     </script>
     {{-- @endscript --}}
 </body>
