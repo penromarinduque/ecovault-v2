@@ -179,7 +179,7 @@
                                         <button class=" btn-outline-primary btn btn-sm" type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
                                             <i class="fa-solid fa-download"></i>
                                         </button>
-                                        <a class="btn btn-outline-primary btn-sm" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}" title="Preview" data-toggle="tooltip" >
+                                        <a class="btn btn-outline-primary btn-sm" target="_blank" href="{{ route('validate-qr', ['id' => strtr(base64_encode($file->barcode_no), '+/=', '-_,') ])}}" title="Preview" data-toggle="tooltip" >
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
                                         @can('upload-file', [App\Models\Folder::class, $main_folder_id])

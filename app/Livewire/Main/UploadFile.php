@@ -104,6 +104,7 @@ class UploadFile extends Component
             'date_released' => $this->date_released,
             'doc_classification_id' => $this->classification,
             'barcode_no' => $this->barcode_no,
+            "released_by" => auth()->user()->id,
             'file_type' => $this->document->getClientOriginalExtension(),
             'file_name' => $file_name,
             'order_no' => $this->order_no

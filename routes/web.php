@@ -57,8 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/two-factor', 'settings.two-factor')
         ->middleware(
             when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+                Features::canManageTwoFactorAuthentication() && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
                 ['password.confirm'],
                 [],
             ),

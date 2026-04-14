@@ -13,7 +13,6 @@
                         <div class="card bg-light border-start mb-1">
                             <div class="card-body">
                                 {{ $log->message }}
-
                                 <div class="small text-muted">
                                     {{ $log->created_at->diffForHumans() }}
                                 </div>
