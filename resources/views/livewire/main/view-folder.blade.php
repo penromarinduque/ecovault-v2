@@ -12,6 +12,7 @@
     @livewire('main.folder-rename')
     @livewire('main.folder-move')
     @livewire('main.share-folder')
+    @livewire('main.view-logs')
     <h3>{{ $main_folder->name }}</h3>
     <div class="row mb-3 justify-content-end ">
         @if (auth()->user()->isAdmin())
@@ -189,11 +190,14 @@
                                         <button class="btn btn-outline-primary btn-sm" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
+                                        <button class="btn btn-outline-primary btn-sm" type="button" wire:click="viewLogs({{ $file->id }})" title="View Logs" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-timeline"></i>
+                                        </button>
                                         {{-- <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">
                                             <i class="fa-solid fa-qrcode"></i> Attach QR Code
                                         </a> --}}
                                         @can('upload-file', [App\Models\Folder::class, $main_folder_id])
-                                            <button class="btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
+                                            <button class="btn btn-danger btn-sm" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         @endcan 

@@ -266,4 +266,12 @@ class File extends Model
             return false;
         }
     }
+
+    public function createLog($message, $user_id = null){
+        $log = new FileLog();
+        $log->file_id = $this->id;
+        $log->user_id = $user_id;
+        $log->message = $message;
+        $log->save();
+    }
 }

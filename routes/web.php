@@ -41,6 +41,7 @@ Route::group(["prefix" => "main", "as" => "main."], function () {
 
 Route::get('preview/{id}', function ($id) {
     $file = File::find($id);
+    $file->createLog(auth()->user()->name.' viewed the file: '.$file->name, auth()->user()->id);
     return Storage::response('/uploads/'.$file->file_name, $file->name);
 })->name('preview');
 

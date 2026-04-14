@@ -3,6 +3,7 @@
 namespace App\Livewire\Main;
 
 use App\Models\File;
+use App\Models\FileLog;
 use App\Models\Folder;
 use App\Models\MainFolder;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,7 @@ class ViewFolder extends Component
 
     public function downloadFile($file_id) {
         $file = File::find($file_id);
+        $file->createLog(auth()->user()->name.' downloaded the file: '.$file->name, auth()->user()->id);
         $this->authorize('view', $file);
         return Storage::download('/uploads/'.$file->file_name, $file->name);
     }
@@ -48,6 +50,7 @@ class ViewFolder extends Component
     public function deleteFile($file_id) {
         $file = File::find($file_id);
         $this->authorize('delete', $file);
+        $file->createLog(auth()->user()->name.' deleted the file: '.$file->name, auth()->user()->id);
         Storage::delete('/uploads/'.$file->file_name);
         $file->delete();
     }
@@ -56,6 +59,7 @@ class ViewFolder extends Component
     {
         $file = File::findOrFail($file_id);
         $this->authorize('view', $file);
+        $file->createLog(auth()->user()->name.' viewed the file: '.$file->name, auth()->user()->id);
         $path = 'uploads/' . $file->file_name;
 
         if (!Storage::exists($path)) {
@@ -126,6 +130,11 @@ class ViewFolder extends Component
     public function editFile($file_id)
     {
         $this->dispatch('editFile', file_id: $file_id);
+    }
+
+    public function viewLogs($file_id)
+    {
+        $this->dispatch('viewLogs', file_id: $file_id);
     }
 
     public function moveFolder($folder_id, $main_folder_id) 

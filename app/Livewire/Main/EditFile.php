@@ -82,6 +82,7 @@ class EditFile extends Component
                 notyf()->position('y', 'top')->success('File updated successfully!');
                 $this->dispatch('hide-edit-file-modal');
                 $this->dispatch('refresh-folders');
+                $this->file->createLog(auth()->user()->name.' updated the file: '.$this->file->name, auth()->user()->id);
             });
         } catch (\Throwable $th) {
             notyf()->position('y', 'top')->error('An unexpected error occured while saving the file. Please try again.');
