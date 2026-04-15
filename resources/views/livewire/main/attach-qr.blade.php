@@ -21,11 +21,25 @@
     <style>
         /* ====== CSS CUSTOM PROPERTIES ====== */
         :root {
-            /* Paper dimensions (pixels) */
-            --paper-width: 794px;
-            --paper-height: 1123px;
-            --paper-width-number: 794;
-            --paper-height-number: 1123;
+            /* A4 paper size */
+            --A4-width: 990px;
+            --A4-height: 1400px;
+            /* Short paper size (Letter) */
+            --short-width: 991px;
+            --short-height: 1289px;
+            /* Long paper size (Legal) */
+            --long-width: 992px;
+            --long-height: 1646px;
+
+            /* Display paper dimensions (default to A4) */
+            --display-paper-width: 990px;
+            --display-paper-height: 1400px;
+            
+            /* Rendering paper dimensions (for PDF canvas) */
+            --paper-width: 990px;
+            --paper-height: 1400px;
+            --paper-width-number: 990;
+            --paper-height-number: 1400;
             
             /* QR/Barcode container base dimensions */
             --qr-container-base-width: 350px;
@@ -73,16 +87,17 @@
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
-            margin: 0 auto 20px;
+            margin: 0 0px;
             overflow: hidden;
             contain: layout style paint; /* Performance optimization */
-            width: var(--paper-width);
+            width: var(--display-paper-width);
+            height: var(--display-paper-height);
         }
 
         #pdf-canvas {
             display: block;
-            width: var(--paper-width);
-            height: var(--paper-height);
+            width: 100%;
+            height: 100%;
         }
 
         /* ========================================
@@ -310,12 +325,6 @@
            - Color preservation for accurate output
            ======================================== */
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 0;
-                padding: 0;
-            }
-
             html, body {
                 width: 100%;
                 height: 100%;
@@ -389,9 +398,9 @@
         <!-- ====== LEFT SIDEBAR: DOCUMENT INFO & CONTROLS ====== -->
         <div id="left-side-panel" class="col-12 col-lg-3">
             <!-- Back button -->
-            <button onclick="history.back()" class="btn btn-secondary mb-3">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary mb-3">
                 &larr; Back
-            </button>
+            </a>
             
             <!-- Document metadata display -->
             <div class="document-information-container mb-5">
@@ -556,7 +565,7 @@
 
                             // Supported paper sizes with dimensions (in pixels)
                             const PAPER_SIZES = {
-                                'A4':    { width: 794,  height: 1123 },
+                                'A4':    { width: 990,  height: 1400 },
                                 'Short': { width: 816,  height: 1056 },
                                 'Long':  { width: 816,  height: 1344 },
                             };
@@ -585,21 +594,34 @@
                             let pdfDoc      = null;          // Loaded PDF document
                             let currentPage = 1;             // Current page number
                             let renderTask  = null;          // Current rendering task
-                            let currentSize = paperSelect ? paperSelect.value : 'A4';
+                            let currentSize = paperSelect.value;
                             let isResizing  = false;         // Track active resize operation
                             let resizeStartX = 0, resizeStartY = 0;
                             let resizeStartWidth = 0, resizeStartHeight = 0;
 
                             /**
                              * Apply paper size and update rendering
-                             * Updates CSS variables for paper dimensions
+                             * Updates CSS variables for both display and rendering paper dimensions
                              */
                             function applyPaperSize(size) {
+                                const displayDimensions = {
+                                    'A4': { width: 990, height: 1400 },
+                                    'Short': { width: 991, height: 1289 },
+                                    'Long': { width: 992, height: 1646 }
+                                };
                                 const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
+                                const displayDim = displayDimensions[size] || displayDimensions['A4'];
+                                
+                                // Update rendering dimensions
                                 root.style.setProperty('--paper-width', dim.width + 'px');
                                 root.style.setProperty('--paper-height', dim.height + 'px');
                                 root.style.setProperty('--paper-width-number', dim.width);
                                 root.style.setProperty('--paper-height-number', dim.height);
+                                
+                                // Update display dimensions
+                                root.style.setProperty('--display-paper-width', displayDim.width + 'px');
+                                root.style.setProperty('--display-paper-height', displayDim.height + 'px');
+                                
                                 renderPage(currentPage);
                             }
 
@@ -829,10 +851,31 @@
                             });
 
                             /**
+                             * Set dynamic @page size for printing based on selected paper size
+                             */
+                            function setPrintPageSize(size) {
+                                let pageSize;
+                                if (size === 'A4') {
+                                    pageSize = 'A4 portrait';
+                                } else if (size === 'Short') {
+                                    pageSize = 'letter portrait';
+                                } else if (size === 'Long') {
+                                    pageSize = 'legal portrait';
+                                } else {
+                                    pageSize = 'A4 portrait';
+                                }
+                                const style = document.createElement('style');
+                                style.id = 'dynamic-print-page-style';
+                                style.innerHTML = `@page { size: ${pageSize}; margin: 0; padding: 0; }`;
+                                document.head.appendChild(style);
+                            }
+
+                            /**
                              * Print handler
                              */
                             printButton.addEventListener('click', function () {
                                 syncQrBarcodePositionForPrint();
+                                setPrintPageSize(currentSize);
                                 document.body.classList.remove('print-qr-only');
                                 window.print();
                             });
@@ -840,6 +883,7 @@
                             if (printQrButton) {
                                 printQrButton.addEventListener('click', function () {
                                     syncQrBarcodePositionForPrint();
+                                    setPrintPageSize(currentSize);
                                     document.body.classList.add('print-qr-only');
                                     window.print();
                                 });
@@ -851,6 +895,8 @@
                                 qrBarcodeContainer.style.removeProperty('--print-left');
                                 qrBarcodeContainer.style.removeProperty('--print-top');
                                 document.body.classList.remove('print-qr-only');
+                                const style = document.getElementById('dynamic-print-page-style');
+                                if (style) style.remove();
                             });
 
                             // Initialize PDF viewer

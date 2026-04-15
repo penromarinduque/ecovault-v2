@@ -161,7 +161,7 @@ class ViewFolder extends Component
     public function mount($main_folder_id)
     {
         $this->main_folder_id = $main_folder_id;
-        $this->main_folder = MainFolder::find($main_folder_id);
+        $this->main_folder = MainFolder::findOrFail($main_folder_id);
         $this->folder = $this->folder_id ? Folder::where('id', $this->folder_id)->with('parentFolder')->first() : null;
         Log::info($this->folder);
     }
