@@ -466,7 +466,7 @@
                     $mime = Storage::mimeType($path) ?: 'application/octet-stream';
                 @endphp
 
-                {{-- ====== IMAGE PREVIEW ====== --}}
+                {{-- ====== IMAGE PREVIEW WITH QR/BARCODE OVERLAY ====== --}}
                 @if(str_starts_with($mime, 'image/'))
                     @php
                         try {
@@ -477,7 +477,275 @@
                         }
                     @endphp
                     @if($base64)
-                        <img src="{{ $base64 }}" alt="File Preview" style="max-width: 100%; max-height: 400px; object-fit: contain;">
+                        <!-- Paper/Page container for image -->
+                        <div id="pdf-paper">
+                            <!-- Image preview -->
+                            <img id="image-canvas" src="{{ $base64 }}" alt="Image Preview" style="width: 100%; height: 100%; object-fit: contain;">
+
+                            <!-- QR & Barcode overlay container (draggable & resizable) -->
+                            <div id="qr-barcode-container">
+                                <div class="qr-barcode-inner">
+                                    <!-- Only show QR/barcode content if generated -->
+                                    @if($qr_src || $barcode_src)
+                                        <div class="qr-barcode-container__flex">
+                                            <!-- Left section: DENR logo + barcode -->
+                                            <div class="bar-code-logo-container">
+                                                <!-- DENR organization logo and name -->
+                                                <div class="denr-logo">
+                                                    <img class="denr-logo__img" src="{{ asset('LOGO.svg') }}" alt="DENR Logo">
+                                                    <p class="denr-logo__txt">
+                                                        Department of Environment <br>
+                                                        and Natural Resources <br>
+                                                        <span>PENRO - Marinduque</span>
+                                                    </p>
+                                                </div>
+
+                                                <!-- Document barcode (if generated) -->
+                                                @if($barcode_src)
+                                                    <div>
+                                                        <img class="barcode" src="{{ $barcode_src }}" alt="Barcode" />
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <!-- Right section: QR code with centered logo overlay -->
+                                            @if($qr_src)
+                                                <div class="qr-code-container">
+                                                    <img class="qr-code-container__logo" src="{{ asset('LOGO.svg') }}" alt="DENR Logo">
+                                                    <img class="qr-code" src="{{ $qr_src }}" alt="QR Code" />
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                <!-- Resize handle (visible only after generation) -->
+                                <div class="qr-barcode-resize-handle {{ $showResizeHandle ? '' : 'hide' }}" aria-label="Resize QR container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Image printing & controls script -->
+                        <script>
+                            (function () {
+                                const root = document.documentElement;
+                                const paper = document.getElementById('pdf-paper');
+                                const qrBarcodeContainer = document.getElementById('qr-barcode-container');
+                                const qrResizeHandle = document.querySelector('.qr-barcode-resize-handle');
+                                const paperSelect = document.getElementById('paperSize');
+
+                                // Supported paper sizes with dimensions (in pixels)
+                                const PAPER_SIZES = {
+                                    'A4':    { width: 990,  height: 1400 },
+                                    'Short': { width: 816,  height: 1056 },
+                                    'Long':  { width: 816,  height: 1344 },
+                                };
+
+                                const QR_BASE = {
+                                    width: parseFloat(getComputedStyle(root).getPropertyValue('--qr-container-base-width')) || 350,
+                                    height: parseFloat(getComputedStyle(root).getPropertyValue('--qr-container-base-height')) || 180,
+                                };
+
+                                let currentSize = paperSelect?.value || 'A4';
+                                let isResizing = false;
+                                let resizeStartX = 0, resizeStartY = 0;
+                                let resizeStartWidth = 0, resizeStartHeight = 0;
+
+                                /**
+                                 * Apply paper size to image display
+                                 */
+                                function applyPaperSize(size) {
+                                    const displayDimensions = {
+                                        'A4': { width: 990, height: 1400 },
+                                        'Short': { width: 991, height: 1289 },
+                                        'Long': { width: 992, height: 1646 }
+                                    };
+                                    const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
+                                    const displayDim = displayDimensions[size] || displayDimensions['A4'];
+                                    
+                                    root.style.setProperty('--display-paper-width', displayDim.width + 'px');
+                                    root.style.setProperty('--display-paper-height', displayDim.height + 'px');
+                                    root.style.setProperty('--paper-width', dim.width + 'px');
+                                    root.style.setProperty('--paper-height', dim.height + 'px');
+                                    root.style.setProperty('--paper-width-number', dim.width);
+                                    root.style.setProperty('--paper-height-number', dim.height);
+                                }
+
+                                /**
+                                 * Paper size change handler
+                                 */
+                                if (paperSelect) {
+                                    paperSelect.addEventListener('change', function () {
+                                        currentSize = this.value;
+                                        applyPaperSize(currentSize);
+                                        setPrintPageSize(currentSize);
+                                    });
+                                }
+
+                                /**
+                                 * Enable drag functionality for QR/barcode container
+                                 */
+                                function enableDraggableQrBarcode() {
+                                    if (!qrBarcodeContainer) return;
+
+                                    let isDragging = false;
+                                    let dragOffsetX = 0, dragOffsetY = 0;
+
+                                    qrBarcodeContainer.addEventListener('mousedown', function (e) {
+                                        isDragging = true;
+                                        const rect = qrBarcodeContainer.getBoundingClientRect();
+                                        const paperRect = paper.getBoundingClientRect();
+                                        dragOffsetX = e.clientX - rect.left;
+                                        dragOffsetY = e.clientY - rect.top;
+                                        e.preventDefault();
+                                    });
+
+                                    document.addEventListener('mousemove', function (e) {
+                                        if (!isDragging) return;
+
+                                        const paperRect = paper.getBoundingClientRect();
+                                        const containerRect = qrBarcodeContainer.getBoundingClientRect();
+
+                                        let newLeft = e.clientX - paperRect.left - dragOffsetX;
+                                        let newTop = e.clientY - paperRect.top - dragOffsetY;
+
+                                        const maxLeft = paperRect.width - containerRect.width;
+                                        const maxTop = paperRect.height - containerRect.height;
+                                        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                                        newTop = Math.max(0, Math.min(newTop, maxTop));
+
+                                        qrBarcodeContainer.style.left = `${newLeft}px`;
+                                        qrBarcodeContainer.style.top = `${newTop}px`;
+                                    });
+
+                                    document.addEventListener('mouseup', function () {
+                                        isDragging = false;
+                                    });
+                                }
+
+                                /**
+                                 * Enable resize functionality
+                                 */
+                                function enableResizableQrBarcode() {
+                                    if (!qrBarcodeContainer || !qrResizeHandle) return;
+
+                                    qrResizeHandle.addEventListener('mousedown', function (e) {
+                                        isResizing = true;
+                                        resizeStartX = e.clientX;
+                                        resizeStartY = e.clientY;
+                                        resizeStartWidth = qrBarcodeContainer.getBoundingClientRect().width;
+                                        resizeStartHeight = qrBarcodeContainer.getBoundingClientRect().height;
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    });
+
+                                    document.addEventListener('mousemove', function (e) {
+                                        if (!isResizing) return;
+
+                                        const paperRect = paper.getBoundingClientRect();
+                                        const deltaX = e.clientX - resizeStartX;
+                                        const deltaY = e.clientY - resizeStartY;
+
+                                        let newWidth = resizeStartWidth + deltaX;
+                                        let newHeight = resizeStartHeight + deltaY;
+
+                                        const minWidth = QR_BASE.width * 0.1;
+                                        const minHeight = QR_BASE.height * 0.1;
+                                        const maxWidth = Math.max(minWidth, paperRect.width - qrBarcodeContainer.offsetLeft - 16);
+                                        const maxHeight = Math.max(minHeight, paperRect.height - qrBarcodeContainer.offsetTop - 16);
+
+                                        newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+                                        newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
+
+                                        const scaleX = newWidth / QR_BASE.width;
+                                        const scaleY = newHeight / QR_BASE.height;
+                                        const scale = Math.max(0.1, Math.min(scaleX, scaleY));
+
+                                        qrBarcodeContainer.style.width = `${QR_BASE.width * scale}px`;
+                                        qrBarcodeContainer.style.height = `${QR_BASE.height * scale}px`;
+                                        qrBarcodeContainer.style.setProperty('--qr-scale', scale.toString());
+                                    });
+
+                                    document.addEventListener('mouseup', function () {
+                                        if (isResizing) {
+                                            isResizing = false;
+                                        }
+                                    });
+                                }
+
+                                /**
+                                 * Sync QR position for print
+                                 */
+                                function syncQrBarcodePositionForPrint() {
+                                    if (!qrBarcodeContainer || !paper) return;
+
+                                    const paperRect = paper.getBoundingClientRect();
+                                    const computed = getComputedStyle(qrBarcodeContainer);
+                                    const leftPx = parseFloat(computed.left) || 0;
+                                    const topPx = parseFloat(computed.top) || 0;
+
+                                    const leftPercent = (leftPx / paperRect.width) * 100;
+                                    const topPercent = (topPx / paperRect.height) * 100;
+
+                                    qrBarcodeContainer.style.setProperty('--print-left', `${leftPercent}%`);
+                                    qrBarcodeContainer.style.setProperty('--print-top', `${topPercent}%`);
+                                }
+
+                                /**
+                                 * Set print page size
+                                 */
+                                function setPrintPageSize(size) {
+                                    document.documentElement.classList.remove('page-a4', 'page-short', 'page-long');
+                                    if (size === 'A4') {
+                                        document.documentElement.classList.add('page-a4');
+                                    } else if (size === 'Short') {
+                                        document.documentElement.classList.add('page-short');
+                                    } else if (size === 'Long') {
+                                        document.documentElement.classList.add('page-long');
+                                    } else {
+                                        document.documentElement.classList.add('page-a4');
+                                    }
+                                }
+
+                                /**
+                                 * Print handler
+                                 */
+                                const printButton = document.getElementById('print-page-btn');
+                                const printQrButton = document.getElementById('print-qr-barcode-btn');
+
+                                if (printButton) {
+                                    printButton.addEventListener('click', function () {
+                                        syncQrBarcodePositionForPrint();
+                                        setPrintPageSize(currentSize);
+                                        document.body.classList.remove('print-qr-only');
+                                        window.print();
+                                    });
+                                }
+
+                                if (printQrButton) {
+                                    printQrButton.addEventListener('click', function () {
+                                        syncQrBarcodePositionForPrint();
+                                        setPrintPageSize(currentSize);
+                                        document.body.classList.add('print-qr-only');
+                                        window.print();
+                                    });
+                                }
+
+                                window.addEventListener('beforeprint', syncQrBarcodePositionForPrint);
+                                window.addEventListener('afterprint', function () {
+                                    if (!qrBarcodeContainer) return;
+                                    qrBarcodeContainer.style.removeProperty('--print-left');
+                                    qrBarcodeContainer.style.removeProperty('--print-top');
+                                    document.body.classList.remove('print-qr-only');
+                                    document.documentElement.classList.remove('page-a4', 'page-short', 'page-long');
+                                });
+
+                                // Initialize
+                                applyPaperSize(currentSize);
+                                setPrintPageSize(currentSize);
+                                enableDraggableQrBarcode();
+                                enableResizableQrBarcode();
+                            })();
+                        </script>
                     @else
                         <p class="text-muted">Error loading image.</p>
                     @endif
