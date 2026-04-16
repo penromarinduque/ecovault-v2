@@ -325,6 +325,9 @@
            - Color preservation for accurate output
            ======================================== */
         @media print {
+            @page {
+                margin: 0;
+            }
             html, body {
                 width: 100%;
                 height: 100%;
@@ -380,10 +383,6 @@
                 visibility: visible;
                 left: var(--print-left, 20px);
                 top: var(--print-top, 20px);
-                /* width: calc(var(--qr-container-base-width) * var(--qr-scale));
-                height: calc(var(--qr-container-base-height) * var(--qr-scale)); */
-                /* width: var(--qr-container-base-width * var(--qr-scale)); */
-                /* height: var(--qr-container-base-height ); */
             }
 
             /* Hide resize handle during print mode */
@@ -600,34 +599,70 @@
                             let resizeStartWidth = 0, resizeStartHeight = 0;
 
                             /**
-                             * Apply paper size and update rendering
-                             * Updates CSS variables for both display and rendering paper dimensions
+                             * Set dynamic @page size for printing based on selected paper size.
+                             * Creates or updates a <style> tag with the correct @page rule.
+                             */
+                            function setPrintPageSize(size) {
+                                let pageSize;
+
+                                if (size === 'A4') {
+                                    pageSize = 'A4';
+                                } else if (size === 'Short') {
+                                    pageSize = 'Letter';
+                                } else if (size === 'Long') {
+                                    pageSize = 'Legal';
+                                } else {
+                                    pageSize = 'A4';
+                                }
+
+                                let style = document.getElementById('dynamic-print-page-style');
+
+                                if (!style) {
+                                    style = document.createElement('style');
+                                    style.id = 'dynamic-print-page-style';
+                                    document.head.appendChild(style);
+                                }
+
+                                // ✅ FIX: wrap inside @media print
+                                style.innerHTML = `
+                                    @media print {
+                                        @page {
+                                            size: ${pageSize} portrait;
+                                            margin: 0;
+                                        }
+                                    }
+                                `;
+                            }
+
+                            /**
+                             * Apply paper size and update rendering.
+                             * Updates CSS variables for both display and rendering paper dimensions.
                              */
                             function applyPaperSize(size) {
                                 const displayDimensions = {
-                                    'A4': { width: 990, height: 1400 },
-                                    'Short': { width: 991, height: 1289 },
-                                    'Long': { width: 992, height: 1646 }
+                                    'A4':    { width: 990,  height: 1400 },
+                                    'Short': { width: 991,  height: 1289 },
+                                    'Long':  { width: 992,  height: 1646 },
                                 };
-                                const dim = PAPER_SIZES[size] || PAPER_SIZES['A4'];
-                                const displayDim = displayDimensions[size] || displayDimensions['A4'];
+                                const dim        = PAPER_SIZES[size]        || PAPER_SIZES['A4'];
+                                const displayDim = displayDimensions[size]  || displayDimensions['A4'];
                                 
                                 // Update rendering dimensions
-                                root.style.setProperty('--paper-width', dim.width + 'px');
-                                root.style.setProperty('--paper-height', dim.height + 'px');
+                                root.style.setProperty('--paper-width',        dim.width  + 'px');
+                                root.style.setProperty('--paper-height',       dim.height + 'px');
                                 root.style.setProperty('--paper-width-number', dim.width);
-                                root.style.setProperty('--paper-height-number', dim.height);
+                                root.style.setProperty('--paper-height-number',dim.height);
                                 
                                 // Update display dimensions
-                                root.style.setProperty('--display-paper-width', displayDim.width + 'px');
+                                root.style.setProperty('--display-paper-width',  displayDim.width  + 'px');
                                 root.style.setProperty('--display-paper-height', displayDim.height + 'px');
                                 
                                 renderPage(currentPage);
                             }
 
                             /**
-                             * Render a specific PDF page to canvas
-                             * Scales PDF to fit within paper bounds
+                             * Render a specific PDF page to canvas.
+                             * Scales PDF to fit within paper bounds.
                              */
                             function renderPage(num) {
                                 if (!pdfDoc) return;
@@ -672,8 +707,8 @@
                             }
 
                             /**
-                             * Initialize PDF.js and load document
-                             * Waits for PDF.js library to be loaded
+                             * Initialize PDF.js and load document.
+                             * Waits for PDF.js library to be loaded.
                              */
                             function initPdf() {
                                 if (typeof window.pdfjsLib === 'undefined') {
@@ -694,18 +729,20 @@
                             }
 
                             /**
-                             * Paper size change handler
+                             * Paper size change handler.
+                             * Updates paper size, re-renders PDF, and updates print @page rule.
                              */
                             if (paperSelect) {
                                 paperSelect.addEventListener('change', function () {
                                     currentSize = this.value;
                                     applyPaperSize(currentSize);
+                                    setPrintPageSize(currentSize); // ← Keep @page in sync on every change
                                 });
                             }
 
                             /**
-                             * Enable drag functionality for QR/barcode container
-                             * Constrains movement within paper bounds
+                             * Enable drag functionality for QR/barcode container.
+                             * Constrains movement within paper bounds.
                              */
                             function enableDraggableQrBarcode() {
                                 if (!qrBarcodeContainer) return;
@@ -715,8 +752,7 @@
 
                                 qrBarcodeContainer.addEventListener('mousedown', function (e) {
                                     isDragging = true;
-                                    const rect  = qrBarcodeContainer.getBoundingClientRect();
-                                    const paperRect = paper.getBoundingClientRect();
+                                    const rect      = qrBarcodeContainer.getBoundingClientRect();
                                     dragOffsetX = e.clientX - rect.left;
                                     dragOffsetY = e.clientY - rect.top;
                                     e.preventDefault();
@@ -749,17 +785,17 @@
                             enableDraggableQrBarcode();
 
                             /**
-                             * Enable resize functionality for QR/barcode container
-                             * Maintains proportional scaling with min/max constraints
+                             * Enable resize functionality for QR/barcode container.
+                             * Maintains proportional scaling with min/max constraints.
                              */
                             function enableResizableQrBarcode() {
                                 if (!qrBarcodeContainer || !qrResizeHandle) return;
 
                                 qrResizeHandle.addEventListener('mousedown', function (e) {
                                     isResizing = true;
-                                    resizeStartX = e.clientX;
-                                    resizeStartY = e.clientY;
-                                    resizeStartWidth = qrBarcodeContainer.getBoundingClientRect().width;
+                                    resizeStartX      = e.clientX;
+                                    resizeStartY      = e.clientY;
+                                    resizeStartWidth  = qrBarcodeContainer.getBoundingClientRect().width;
                                     resizeStartHeight = qrBarcodeContainer.getBoundingClientRect().height;
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -769,27 +805,27 @@
                                     if (!isResizing) return;
 
                                     const paperRect = paper.getBoundingClientRect();
-                                    const deltaX = e.clientX - resizeStartX;
-                                    const deltaY = e.clientY - resizeStartY;
+                                    const deltaX    = e.clientX - resizeStartX;
+                                    const deltaY    = e.clientY - resizeStartY;
 
-                                    let newWidth = resizeStartWidth + deltaX;
+                                    let newWidth  = resizeStartWidth  + deltaX;
                                     let newHeight = resizeStartHeight + deltaY;
 
                                     // Apply size constraints
-                                    const minWidth = QR_BASE.width * 0.1;
+                                    const minWidth  = QR_BASE.width  * 0.1;
                                     const minHeight = QR_BASE.height * 0.1;
-                                    const maxWidth = Math.max(minWidth, paperRect.width - qrBarcodeContainer.offsetLeft - 16);
-                                    const maxHeight = Math.max(minHeight, paperRect.height - qrBarcodeContainer.offsetTop - 16);
+                                    const maxWidth  = Math.max(minWidth,  paperRect.width  - qrBarcodeContainer.offsetLeft - 16);
+                                    const maxHeight = Math.max(minHeight, paperRect.height - qrBarcodeContainer.offsetTop  - 16);
 
-                                    newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
+                                    newWidth  = Math.max(minWidth,  Math.min(newWidth,  maxWidth));
                                     newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
 
                                     // Calculate proportional scale
-                                    const scaleX = newWidth / QR_BASE.width;
+                                    const scaleX = newWidth  / QR_BASE.width;
                                     const scaleY = newHeight / QR_BASE.height;
-                                    const scale = Math.max(0.1, Math.min(scaleX, scaleY));
+                                    const scale  = Math.max(0.1, Math.min(scaleX, scaleY));
 
-                                    qrBarcodeContainer.style.width = `${QR_BASE.width * scale}px`;
+                                    qrBarcodeContainer.style.width  = `${QR_BASE.width  * scale}px`;
                                     qrBarcodeContainer.style.height = `${QR_BASE.height * scale}px`;
                                     qrBarcodeContainer.style.setProperty('--qr-scale', scale.toString());
                                 });
@@ -805,34 +841,24 @@
 
                             /**
                              * Sync current on-screen QR container position to print-ready values.
-                             * Uses the current paper preview dimensions and converts pixels to millimeters.
+                             * Converts pixel position to percentage relative to paper dimensions.
                              */
                             function syncQrBarcodePositionForPrint() {
                                 if (!qrBarcodeContainer || !paper) return;
 
                                 const paperRect = paper.getBoundingClientRect();
-                                const computed = getComputedStyle(qrBarcodeContainer);
- 
-                                const scale = parseFloat(computed.getPropertyValue('--qr-scale')) || 1;
+                                const computed  = getComputedStyle(qrBarcodeContainer);
 
-                                const leftPx = parseFloat(computed.left) || 0;
-                                const topPx = parseFloat(computed.top) || 0;
+                                const leftPx   = parseFloat(computed.left)   || 0;
+                                const topPx    = parseFloat(computed.top)    || 0;
+                                const codeWidth  = qrBarcodeContainer.style.width  ? parseFloat(qrBarcodeContainer.style.width)  : parseFloat(computed.getPropertyValue('--qr-container-base-width'));
+                                const codeHeight = qrBarcodeContainer.style.height ? parseFloat(qrBarcodeContainer.style.height) : parseFloat(computed.getPropertyValue('--qr-container-base-height'));
 
-                                const codeWidth = qrBarcodeContainer.style.width ? parseFloat(qrBarcodeContainer.style.width) : computed.getPropertyValue('--qr-container-base-width');
-                                const codeHeight = qrBarcodeContainer.style.height ? parseFloat(qrBarcodeContainer.style.height) : computed.getPropertyValue('--qr-container-base-height');
+                                const leftPercent = (leftPx    / paperRect.width)  * 100;
+                                const topPercent  = (topPx     / paperRect.height) * 100;
 
-                                const widthPercent = (codeWidth / paperRect.width) * 100;
-                                const heightPercent = (codeHeight / paperRect.height) * 100;
-
-                                // const leftPercent = (leftPx / 3000) * 100;
-                                // const topPercent = (topPx / 1754) * 100;
-                                const leftPercent = (leftPx / paperRect.width) * 100;
-                                const topPercent = (topPx / paperRect.height) * 100;
-
-                                // qrBarcodeContainer.style.setProperty("--qr-container-base-width", `${widthPercent}%`);
-                                // qrBarcodeContainer.style.setProperty("--qr-container-base-height", `${heightPercent}%`);
                                 qrBarcodeContainer.style.setProperty('--print-left', `${leftPercent}%`);
-                                qrBarcodeContainer.style.setProperty('--print-top', `${topPercent}%`);
+                                qrBarcodeContainer.style.setProperty('--print-top',  `${topPercent}%`);
                             }
 
                             /**
@@ -851,44 +877,42 @@
                             });
 
                             /**
-                             * Set dynamic @page size for printing based on selected paper size
-                             */
-                            function setPrintPageSize(size) {
-                                let pageSize;
-                                if (size === 'A4') {
-                                    pageSize = 'A4 portrait';
-                                } else if (size === 'Short') {
-                                    pageSize = 'letter portrait';
-                                } else if (size === 'Long') {
-                                    pageSize = 'legal portrait';
-                                } else {
-                                    pageSize = 'A4 portrait';
-                                }
-                                const style = document.createElement('style');
-                                style.id = 'dynamic-print-page-style';
-                                style.innerHTML = `@page { size: ${pageSize}; margin: 0; padding: 0; }`;
-                                document.head.appendChild(style);
-                            }
-
-                            /**
-                             * Print handler
+                             * Print full page handler.
+                             * Syncs QR position and applies correct @page size before printing.
                              */
                             printButton.addEventListener('click', function () {
                                 syncQrBarcodePositionForPrint();
                                 setPrintPageSize(currentSize);
+
                                 document.body.classList.remove('print-qr-only');
-                                window.print();
+
+                                // ✅ Force browser to apply updated styles
+                                setTimeout(() => {      
+                                    window.print();
+                                }, 100);
                             });
 
+                            /**
+                             * Print QR & barcode only handler.
+                             */
                             if (printQrButton) {
                                 printQrButton.addEventListener('click', function () {
                                     syncQrBarcodePositionForPrint();
                                     setPrintPageSize(currentSize);
+
                                     document.body.classList.add('print-qr-only');
-                                    window.print();
+
+                                    setTimeout(() => {
+                                        window.print();
+                                    }, 100);
                                 });
                             }
 
+                            /**
+                             * Browser print event hooks.
+                             * beforeprint: ensure position is synced.
+                             * afterprint: clean up temporary print styles.
+                             */
                             window.addEventListener('beforeprint', syncQrBarcodePositionForPrint);
                             window.addEventListener('afterprint', function () {
                                 if (!qrBarcodeContainer) return;
@@ -899,8 +923,26 @@
                                 if (style) style.remove();
                             });
 
-                            // Initialize PDF viewer
+                            /**
+                             * Livewire re-render hook.
+                             * Re-syncs the print page size after Livewire updates the DOM
+                             * (e.g. after paper_size wire:model changes trigger a re-render).
+                             */
+                            document.addEventListener('livewire:load', function () {
+                                Livewire.hook('message.processed', () => {
+                                    const paperSize = document.getElementById('paperSize');
+                                    if (paperSize) {
+                                        currentSize = paperSize.value;
+                                        applyPaperSize(currentSize);
+                                        setPrintPageSize(currentSize);
+                                    }
+                                });
+                            });
+
+                            // ====== INITIALIZE ======
+                            // Apply paper size visually, inject @page rule, and load PDF
                             applyPaperSize(currentSize);
+                            setPrintPageSize(currentSize); // ← Inject @page rule on initial load
                             initPdf();
                         })();
                     </script>
