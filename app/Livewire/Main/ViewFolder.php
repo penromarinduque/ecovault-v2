@@ -172,8 +172,18 @@ class ViewFolder extends Component
         if($this->folder) {
             $this->authorize('view', $this->folder);
         }
-        $folders = $this->folder_id ? Folder::query()->where('parent_folder_id', $this->folder_id)->orderBy("name", $this->folderSortOrder)->get() : Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->orderBy("name", $this->folderSortOrder)->get();
-        $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->orderBy($this->fileSortBy, $this->fileSortOrder)->paginate(10) : [];
+
+        // Validate sort orders and columns, default if invalid
+        $folderSort = in_array($this->folderSortOrder, ['asc', 'desc']) ? $this->folderSortOrder : 'desc';
+        $fileSort = in_array($this->fileSortOrder, ['asc', 'desc']) ? $this->fileSortOrder : 'asc';
+        $fileSortBy = in_array($this->fileSortBy, ['name', 'date_released']) ? $this->fileSortBy : 'name';
+
+        $folders = $this->folder_id ? 
+                    Folder::query()->where('parent_folder_id', $this->folder_id)->orderBy("name", $folderSort)->get() :
+                    Folder::query()->where('parent_folder_id', null)->where('main_folder_id', $this->main_folder_id)->orderBy("name", 'desc')->get();
+
+        $files = $this->folder_id ? File::query()->where('folder_id', $this->folder_id)->where('name', 'like', '%' . $this->search . '%')->orderBy($fileSortBy, $fileSort)->paginate(10) : [];
+
         return view('livewire.main.view-folder', compact('folders', 'files'));
     }
 }

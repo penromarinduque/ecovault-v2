@@ -51,7 +51,7 @@
         <form class="form-inline">
             <label for="fileSortBy" class="form-label mr-2">Sort:</label>
             <select name="folderSortOrder" id="folderSortOrder" class="form-control"  wire:model.live="folderSortOrder">
-                <option value="-">-Sort Order-</option>
+                <option value="">-Sort Order-</option>
                 <option value="asc">Ascending</option>
                 <option value="desc">Descending</option>
             </select>
