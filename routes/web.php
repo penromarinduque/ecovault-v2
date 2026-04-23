@@ -1,12 +1,8 @@
 <?php
-
 use App\Http\Controllers\DashboardController;
 use App\Livewire\Admin\User\UserIndex;
-<<<<<<< HEAD
 use App\Livewire\Main\AttachQr;
-=======
 use App\Livewire\Main\Validate;
->>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
 use App\Livewire\Main\ViewFolder;
 use App\Models\File;
 use Illuminate\Http\Request;
@@ -45,6 +41,7 @@ Route::group(["prefix" => "main", "as" => "main."], function () {
 
 Route::get('preview/{id}', function ($id) {
     $file = File::find($id);
+    $file->createLog(auth()->user()->name.' viewed the file: '.$file->name, auth()->user()->id);
     return Storage::response('/uploads/'.$file->file_name, $file->name);
 })->name('preview');
 
@@ -60,8 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/two-factor', 'settings.two-factor')
         ->middleware(
             when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
+                Features::canManageTwoFactorAuthentication() && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
                 ['password.confirm'],
                 [],
             ),

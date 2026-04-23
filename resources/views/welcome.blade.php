@@ -107,7 +107,7 @@
 
     <div class="logo-container text-center my-5">
         <div class="row justify-content-center">
-            <img src="{{ asset('LOGO.png')}}" alt="DENR Logo" class="img-fluid mb-3">
+            <img src="{{ asset('LOGO.svg')}}" alt="DENR Logo" class="img-fluid mb-3">
             <img src="{{ asset('Bagong_Pilipinas_logo.png')}}" alt="Bagong Pilipinas Logo" class="img-fluid mb-3">
         </div>
         <h4 class="logo-text mb-2">Department of Environment and Natural Resources</h4>

@@ -12,6 +12,7 @@
     @livewire('main.folder-rename')
     @livewire('main.folder-move')
     @livewire('main.share-folder')
+    @livewire('main.view-logs')
     <h3>{{ $main_folder->name }}</h3>
     <div class="row mb-3 justify-content-end ">
         @if (auth()->user()->isAdmin())
@@ -157,7 +158,7 @@
                                 <td>
                                     <div class="d-flex align-items-center" wire:ignore.self>
                                         <div class="btn-group" role="group" >
-                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%229e93e1292f5126d21955919229715d0bbd701294.png%22}">
+                                            <a type="button" class="btn btn-primary" title="QR Code" data-toggle="tooltip" target="_blank" href="https://api.qrcode-monkey.com/qr/custom?data={{ route("validate-qr", ["id" => strtr(base64_encode($file->barcode_no), '+/=', '-_,')]) }}&config={%22logo%22:%22c7e3dafa91a9a2806b38cf5992939868cefc6171.svg%22}">
                                                 <i class="fa-solid fa-qrcode"></i>
                                             </a>
                                             <a type="button" class="btn btn-primary" title="Barcode" data-toggle="tooltip" href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}" target="_blank">
@@ -167,73 +168,39 @@
                                                 <i class="fa-solid fa-barcode"></i> +
                                                 <i class="fa-solid fa-qrcode"></i>
                                             </a>
+                                            <a type="button" class="btn btn-primary" title="Barcode & QR Code" data-toggle="tooltip" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}" target="_blank">
+                                                <i class="fa-solid fa-qrcode"></i> Attach QR Code
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
                                 <td >
-                                    <div class="d-flex gap-1 g-1">
-<<<<<<< HEAD
-                                        <div class="d-flex align-items-center" wire:ignore.self>
-                                        <div class="btn-group" role="group">
-                                            
-                                            <a class="btn btn-primary"
-                                            title="QR Code"
-                                            data-toggle="tooltip"
-                                            target="_blank"
-                                            href="https://api.qrcode-monkey.com/qr/custom?data={{ route('validate-qr', ['id' => $file->barcode_no]) }}&config=%7B%22logo%22%3A%229e93e1292f5126d21955919229715d0bbd701294.png%22%7D">
-                                                <i class="fa-solid fa-qrcode"></i>
-                                            </a>
-
-                                            <a class="btn btn-primary"
-                                            title="Barcode"
-                                            data-toggle="tooltip"
-                                            href="https://barcodeapi.org/api/128/{{ $file->barcode_no }}"
-                                            target="_blank">
-                                                <i class="fa-solid fa-barcode"></i>
-                                            </a>
-
-                                            <a class="btn btn-primary"
-                                            title="Barcode & QR Code"
-                                            data-toggle="tooltip"
-                                            href="{{ route('main.get-qr-and-barcode', ['id' => $file->id]) }}"
-                                            target="_blank">
-                                                <i class="fa-solid fa-barcode"></i> +
-                                                <i class="fa-solid fa-qrcode"></i>
-                                            </a>
-
-                                        </div>
-                                        </div>
-=======
->>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
-                                        <button class="m-1 btn-outline-primary btn " type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
+                                    <div class="p-0">
+                                        <button class=" btn-outline-primary btn btn-sm" type="button" wire:click="downloadFile({{ $file->id }})" title="Download" data-toggle="tooltip" >
                                             <i class="fa-solid fa-download"></i>
                                         </button>
-                                        <a class="m-1 btn btn-outline-primary" target="_blank" href="{{ route('preview', ['id' => $file->id ])}}" title="Preview" data-toggle="tooltip" >
+                                        <a class="btn btn-outline-primary btn-sm" target="_blank" href="{{ route('validate-qr', ['id' => strtr(base64_encode($file->barcode_no), '+/=', '-_,') ])}}" title="Preview" data-toggle="tooltip" >
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
                                         @can('upload-file', [App\Models\Folder::class, $main_folder_id])
-                                            <button class="m-1 btn btn-outline-primary" type="button" wire:click="moveFile({{ $file->id }})" title="Move" data-toggle="tooltip" >
+                                            <button class=" btn btn-outline-primary btn-sm" type="button" wire:click="moveFile({{ $file->id }})" title="Move" data-toggle="tooltip" >
                                                 <i class="fa-solid fa-arrows-up-down-left-right"></i>
                                             </button>
                                         @endcan
-                                        <button class="m-1 btn btn-outline-primary" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
+                                        <button class="btn btn-outline-primary btn-sm" type="button" wire:click="editFile({{ $file->id }})" title="Edit" data-toggle="tooltip" >
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
-<<<<<<< HEAD
-                                         <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">
-                                            <i class="fa-solid fa-qrcode"></i> Attach QR Code
-                                        </a>
-                                        <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
-                                            <i class="fa-solid fa-trash-can"></i>
+                                        <button class="btn btn-outline-primary btn-sm" type="button" wire:click="viewLogs({{ $file->id }})" title="View Logs" data-toggle="tooltip" >
+                                            <i class="fa-solid fa-timeline"></i>
                                         </button>
-
-=======
+                                        {{-- <a class="dropdown-item" href="{{ route('main.folders.attachqr', ['main_file_id' => $file->id]) }}">
+                                            <i class="fa-solid fa-qrcode"></i> Attach QR Code
+                                        </a> --}}
                                         @can('upload-file', [App\Models\Folder::class, $main_folder_id])
-                                            <button class="m-1 btn btn-danger" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
+                                            <button class="btn btn-danger btn-sm" type="button" wire:confirm="Are you sure you want to delete this file?" wire:loading.attr="disabled" wire:click="deleteFile({{ $file->id }})" title="Delete" data-toggle="tooltip" >
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         @endcan 
->>>>>>> a2942e22d44a81bafbb8414f93e7353a3d463ab4
                                     </div>
                                 </td>
                             </tr>

@@ -3,6 +3,7 @@
 namespace App\Livewire\Main;
 
 use App\Models\File;
+use App\Models\FileLog;
 use App\Models\Folder;
 use App\Models\MainFolder;
 use Illuminate\Support\Facades\DB;
@@ -41,6 +42,7 @@ class ViewFolder extends Component
 
     public function downloadFile($file_id) {
         $file = File::find($file_id);
+        $file->createLog(auth()->user()->name.' downloaded the file: '.$file->name, auth()->user()->id);
         $this->authorize('view', $file);
         return Storage::download('/uploads/'.$file->file_name, $file->name);
     }
@@ -48,6 +50,7 @@ class ViewFolder extends Component
     public function deleteFile($file_id) {
         $file = File::find($file_id);
         $this->authorize('delete', $file);
+        $file->createLog(auth()->user()->name.' deleted the file: '.$file->name, auth()->user()->id);
         Storage::delete('/uploads/'.$file->file_name);
         $file->delete();
     }
@@ -56,6 +59,7 @@ class ViewFolder extends Component
     {
         $file = File::findOrFail($file_id);
         $this->authorize('view', $file);
+        $file->createLog(auth()->user()->name.' viewed the file: '.$file->name, auth()->user()->id);
         $path = 'uploads/' . $file->file_name;
 
         if (!Storage::exists($path)) {
@@ -128,6 +132,11 @@ class ViewFolder extends Component
         $this->dispatch('editFile', file_id: $file_id);
     }
 
+    public function viewLogs($file_id)
+    {
+        $this->dispatch('viewLogs', file_id: $file_id);
+    }
+
     public function moveFolder($folder_id, $main_folder_id) 
     {
         $this->main_folder_id = $main_folder_id;
@@ -152,7 +161,7 @@ class ViewFolder extends Component
     public function mount($main_folder_id)
     {
         $this->main_folder_id = $main_folder_id;
-        $this->main_folder = MainFolder::find($main_folder_id);
+        $this->main_folder = MainFolder::findOrFail($main_folder_id);
         $this->folder = $this->folder_id ? Folder::where('id', $this->folder_id)->with('parentFolder')->first() : null;
         Log::info($this->folder);
     }

@@ -104,10 +104,12 @@ class UploadFile extends Component
             'date_released' => $this->date_released,
             'doc_classification_id' => $this->classification,
             'barcode_no' => $this->barcode_no,
+            "released_by" => auth()->user()->id,
             'file_type' => $this->document->getClientOriginalExtension(),
             'file_name' => $file_name,
             'order_no' => $this->order_no
         ]);
+        $file->createLog(auth()->user()->name.' created the file: '.$file->name, auth()->user()->id);
         $file->storeAndEmbedQr($this->document);
         notyf()->position('y', 'top')->success('File uploaded successfully!');
         $this->dispatch('hide-upload-file-modal');

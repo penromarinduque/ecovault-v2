@@ -48,7 +48,7 @@ class File extends Model
             $file_name = Str::random(10) . uniqid() . '.' . $extension;
 
             // Store uploaded file first
-            $filePath = $document->storeAs('uploads', $file_name, 'public');
+            $filePath = $document->storeAs('uploads', $file_name);
 
             // Generate QR code image
             $qr_builder = new Builder(
@@ -265,5 +265,13 @@ class File extends Model
             Log::error('Error generating barcode: ' . $e->getMessage());
             return false;
         }
+    }
+
+    public function createLog($message, $user_id = null){
+        $log = new FileLog();
+        $log->file_id = $this->id;
+        $log->user_id = $user_id;
+        $log->message = $message;
+        $log->save();
     }
 }
